@@ -1,0 +1,234 @@
+================================================================================
+                    KULONGA — RELATÓRIO BACKEND 01
+                    Análise Completa do Projecto
+                    Data: 27/08/2026
+================================================================================
+
+ESTADO ACTUAL: Frontend COM mocks, Backend SEM implementar
+BASE DE DADOS: Supabase (placeholders apenas)
+
+================================================================================
+1. TELAS EXISTENTES (24 screens)
+================================================================================
+
+ONBOARDING (4)
+  [x] splash.tsx           → Tela inicial com logo e animação
+  [x] provincia.tsx        → Seleção de província (18 províncias)
+  [x] lingua.tsx           → Seleção de língua nacional (5 línguas)
+  [x] perfil.tsx           → Tipo de perfil (professor/encarregado/secretaria)
+
+AUTENTICAÇÃO (6)
+  [x] escolher-perfil.tsx  → Escolher entrar como encarregado ou professor
+  [x] login-professor.tsx  → Login email+senha (professor)
+  [x] login-secretaria.tsx → Login email+senha (secretaria/direcção)
+  [x] token-encarregado.tsx→ Código OTP 6 dígitos (encarregado)
+  [x] selector-perfil.tsx  → Perfil duplo (professor+encarregado)
+  [x] index.tsx            → Placeholder temporário
+
+PROFESSOR (5)
+  [x] painel.tsx           → Métricas (turmas/alunos/pendentes)
+  [x] turmas.tsx           → Lista de turmas com progresso
+  [x] lancar-notas.tsx     → Lançar notas (Freq/Prova/Exame)
+  [x] sync.tsx             → Estado de sincronização offline
+  [x] index.tsx            → Redirect para painel
+
+ENCARREGADO (4)
+  [x] painel.tsx           → Notas do aluno por trimestre + média
+  [x] contactos.tsx        → Coordenador + professores (ligação directa)
+  [x] perfil.tsx           → Definições do encarregado
+  [x] index.tsx            → Redirect para painel
+
+SECRETARIA (5)
+  [x] painel.tsx           → Métricas da escola (4 abas)
+  [x] gerar-token.tsx      → Gerar token OTP para aluno
+  [x] adicionar-professor.tsx → Formulário adicionar professor
+  [x] alunos.tsx           → Gestão de alunos com pesquisa
+  [x] index.tsx            → Redirect para painel
+
+================================================================================
+2. TELAS QUE FALTAM
+================================================================================
+
+CADASTRO/REGISTO
+  [x] Tela de cadastro de ESCOLA        ← CONCLUÍDO
+  [x] Tela de cadastro de PROFESSOR      ← CONCLUÍDO
+  [x] Tela de recuperação de senha       ← CONCLUÍDO
+
+GESTÃO DE ALUNOS (falta detalhe)
+  [x] Ver aluno (perfil completo com foto) ← CONCLUÍDO
+  [ ] Editar aluno                        ← pendente (mock apenas)
+  [ ] Matricular aluno em turma           ← pendente (mock apenas)
+  [ ] Remover aluno de turma              ← pendente (mock apenas)
+  [ ] Listar alunos por turma             ← pendente (mock apenas)
+
+GESTÃO DE TURMAS (falta detalhe)
+  [x] Ver turma (lista de alunos inscritos) ← CONCLUÍDO
+  [ ] Editar turma (nome, ano,turma)      ← pendente (mock apenas)
+  [x] Atribuir disciplinas à turma        ← CONCLUÍDO (modal)
+  [ ] Remover disciplina da turma         ← pendente (mock apenas)
+
+DISCIPLINAS
+  [x] Adicionar disciplina                ← CONCLUÍDO
+  [x] Editar disciplina                   ← CONCLUÍDO
+  [x] Listar disciplinas da escola        ← CONCLUÍDO
+  [ ] Atribuir disciplina ao professor    ← pendente (mock apenas)
+  [ ] Remover disciplina do professor     ← pendente (mock apenas)
+
+BOLETIM / RELATÓRIO
+  [x] Ver boletim completo por trimestre  ← CONCLUÍDO
+  [x] Boletim anual                       ← CONCLUÍDO
+  [ ] Gerar boletim do aluno (PDF)        ← pendente (futuro)
+  [ ] Exportar/enviar boletim             ← pendente (futuro)
+
+PERFIL / CONFIGURAÇÕES
+  [x] Editar perfil próprio (nome, foto, email) ← CONCLUÍDO (3 papéis)
+  [x] Alterar senha                       ← CONCLUÍDO
+  [ ] Definições da escola (secretaria)   ← pendente
+  [ ] Configurar ano lectivo              ← pendente
+  [ ] Definir trimestres/parciais         ← pendente
+
+================================================================================
+3. BACKEND/SERVICES — ESTADO ACTUAL
+================================================================================
+
+services/supabase.ts
+  → PLACEHOLDER: URL e key fictícios
+  → NÃO LIGADO ao Supabase real
+  → Precisa: Project URL + anon key reais
+
+services/auth.ts
+  → SÓ MOCKS (prof@kulonga.ao / 123456)
+  → loginComEmail()        → DESCOMENTAR
+  → validarTokenEncarregado() → DESCOMENTAR
+  → verificarSessao()      → DESCOMENTAR
+  → logout()               → DESCOMENTAR (Supabase)
+
+services/notas.ts
+  → SÓ MOCKS
+  → buscarNotasAluno()     → DESCOMENTAR
+  → lancarNota()           → DESCOMENTAR (WatermelonDB)
+  → sincronizarPendentes() → IMPLEMENTAR
+  → gerarTokenAluno()      → DESCOMENTAR
+
+services/index.ts
+  → Exporta tudo (ok)
+
+================================================================================
+4. BASE DE DADOS — O QUE PRECISA SER CRIADO NO SUPABASE
+================================================================================
+
+TABELAS NECESSÁRIAS:
+  [ ] escolas         → dados da escola (nome, província, dirección)
+  [ ] professores     → professores vinculados à escola
+  [ ] alunos          → alunos matriculados
+  [ ] turmas          → turmas (ex: 8ªB, 10ªA)
+  [ ] disciplinas     → disciplinas (Matemática, Português...)
+  [ ] turma_alunos    → relação turma-aluno (matrícula)
+  [ ] turma_disciplinas → relação turma-disciplina
+  [ ] disciplina_professor → relação disciplina-professor
+  [ ] notas           → notas lançadas (com hierarquia de papéis)
+  [ ] encarregados    → encarregados de educação
+  [ ] tokens_acesso   → tokens OTP para encarregados
+  [ ] users           → tabela de auth do Supabase
+
+VIEWS:
+  [ ] notas_vigentes  → nota válida por hierarquia (sec > coord > prof)
+
+EXTENSÕES SUPABASE:
+  [ ] pgcrypto
+  [ ] pg_trgm
+  [ ] unaccent
+
+STORAGE:
+  [ ] Bucket: fotos-alunos
+
+RLS (Row Level Security):
+  [ ] Políticas para cada tabela
+  [ ] Professor só vê as suas turmas
+  [ ] Encarregado só vê o seu aluno
+  [ ] Secretaria vê tudo da escola
+
+================================================================================
+5. WATERMELONDB — MODELOS LOCAIS (pasta db/models/ VAZIA)
+================================================================================
+
+  [ ] Modelo: Escola
+  [ ] Modelo: Professor
+  [ ] Modelo: Aluno
+  [ ] Modelo: Turma
+  [ ] Modelo: Disciplina
+  [ ] Modelo: Nota
+  [ ] Modelo: NotaPendente (para sync offline)
+  [ ] Modelo: TokenAcesso
+
+================================================================================
+6. ORDEM DE TRABALHO SUGERIDA
+================================================================================
+
+FASE 1 — SETUP SUPABASE (fazer primeiro)
+  1. Criar projecto no supabase.com
+  2. Copiar Project URL e anon key → services/supabase.ts
+  3. Activar Email Auth no Dashboard
+  4. Aplicar SQL do schema (tabelas + RLS + views)
+  5. Criar bucket Storage: fotos-alunos
+  6. Criar utilizadores de teste
+
+FASE 2 — DESCOMENTAR SERVICES (já têm código)
+  1. services/auth.ts → descomentar loginComEmail()
+  2. services/auth.ts → descomentar validarTokenEncarregado()
+  3. services/auth.ts → descomentar verificarSessao()
+  4. services/notas.ts → descomentar buscarNotasAluno()
+  5. services/notas.ts → descomentar gerarTokenAluno()
+  6. Ligar painel encarregado ao Supabase
+  7. Ligar lançamento de notas ao Supabase
+
+FASE 3 — CRIAR SERVICES NOVOS
+  1. services/escolas.ts    → CRUD escolas
+  2. services/professores.ts→ CRUD professores
+  3. services/alunos.ts     → CRUD alunos
+  4. services/turmas.ts     → CRUD turmas
+  5. services/disciplinas.ts→ CRUD disciplinas
+  6. services/boletim.ts    → Gerar boletim
+
+FASE 4 — TELAS QUE FALTAM
+  1. Tela de cadastro de escola
+  2. Tela de cadastro de professor
+  3. Detalhe de aluno
+  4. Detalhe de turma
+  5. Gestão de disciplinas
+  6. Boletim do aluno
+
+FASE 5 — WATERMELONDB (offline)
+  1. Criar modelos em db/models/
+  2. Configurar sync com Supabase
+  3. Testar offline (lançar notas sem net)
+  4. Testar sincronização automática
+
+================================================================================
+7. CREDENCIAIS DE TESTE (MOCKS ACTUAIS)
+================================================================================
+
+  Professor:  prof@kulonga.ao / 123456
+  Secretaria: sec@kulonga.ao  / 123456
+  Token OTP:  123456
+
+  NOTA: Estes são mocks. Quando Supabase estiver ligado,
+        os utilizadores reais serão criados no Dashboard.
+
+================================================================================
+8. NOTAS TÉCNICAS
+================================================================================
+
+  Framework:     Expo SDK 54 + React Native 0.81.5
+  Router:        expo-router v6
+  State:         AsyncStorage (local)
+  Backend:       Supabase (Auth + Database + Storage)
+  Offline:       WatermelonDB (pendente de implementar)
+  Estilo:        NativeWind v4 (Tailwind)
+  Formulários:   react-hook-form + zod
+  Navegação:     Stack + TabBar custom
+
+================================================================================
+FIM DO RELATÓRIO — KULONGA v1.0.0
+© 2025 Custódio Cahilo — Lukashi
+================================================================================

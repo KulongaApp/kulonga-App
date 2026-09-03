@@ -1,0 +1,58 @@
+RELATÓRIO BACKEND 05 — KULONGA (FASE 5/6: ligação das telas aos services reais)
+============================================================================
+
+DATA: 2026-08-28
+ESTADO: Telas ligadas ao Supabase (CRUD + leitura + lançamento de notas).
+
+TELAS LIGADAS (já não usam mock):
+-----------------------------------
+1. (secretaria)/alunos.tsx
+   - listarAlunos(escola) + modal de criar (adicionarAluno).
+2. (secretaria)/disciplinas.tsx
+   - listarDisciplinas / adicionarDisciplina / actualizarDisciplina / removerDisciplina.
+3. (secretaria)/adicionar-professor.tsx
+   - adicionarProfessor (pre-registo com user_id null; o professor self-regista em
+     cadastro-professor para criar a conta Auth).
+4. (secretaria)/gerar-token.tsx
+   - listarAlunos + gerarTokenAluno(alunoId, userId) -> insere em tokens_acesso.
+5. (encarregado)/boletim.tsx
+   - buscarAluno + buscarNotasAluno (VIEW notas_vigentes) agrupado por disciplina/trimestre.
+   - Média do trimestre = média de MAC e PT (corresponde a MF = (MAC+PT)/2).
+6. (secretaria)/painel.tsx
+   - buscarEscola + listarAlunos/listarProfessores/listarTurmas (contagens e listas reais).
+   - Logout real (supabase.auth.signOut via services/auth.logout).
+7. (professor)/painel.tsx
+   - professores row (nome/email) + buscarEscola + listarTurmas da escola. Logout real.
+8. (encarregado)/painel.tsx
+   - buscarAluno + buscarNotasAluno (disciplinas + média por trimestre). Logout real.
+9. (professor)/lancar-notas.tsx  [CORE]
+   - Carrega turmas e disciplinas da escola (selector modal), alunos da turma
+     (listarAlunosTurma), mantém cálculo MAC/MF, e GUARDA em notas (MAC + PT)
+     via supabase.from('notas').insert. Autor = auth.uid(), papel 'professor'.
+
+FICHEIROS NOVOS/ALTERADOS:
+-------------------------
+- services/professores.ts: + obterEscolaDoUsuario()
+- app/(secretaria)/alunos.tsx, disciplinas.tsx, adicionar-professor.tsx, gerar-token.tsx, painel.tsx
+- app/(encarregado)/boletim.tsx, painel.tsx
+- app/(professor)/painel.tsx, lancar-notas.tsx
+
+PENDENTE (AÇÃO DO UTILIZADOR — obrigatório para cadastro funcionar):
+--------------------------------------------------------------------
+- Executar fix-cadastro-rpc.sql no Supabase SQL Editor (RPC SECURITY DEFINER).
+- Depois: NOTIFY pgrst, 'reload schema';
+- Authentication -> Providers -> Email -> DESLIGAR "Confirm email"
+  (senão signUp não cria sessão e o RPC falha).
+
+NOTAS / LIMITAÇÕES CONHECIDAS:
+------------------------------
+- adicionar-professor (secretaria) faz pre-registo (user_id null). O professor
+  cria a conta em cadastro-professor. Não há duplo-login de Auth no cliente
+  (sem service_role) — por isso o secretário não cria a senha do professor.
+- lancar-notas guarda MAC e PT; o boletim calcula MF por trimestre.
+- RelatorioTurma (modal) ainda usa dados mock — separar da tela principal.
+- Sincronização offline (WatermelonDB) ainda não implementada (FASE 6):
+  lancarNota guarda directo no Supabase quando há sessão.
+
+TYPECHECK: npx tsc --noEmit --skipLibCheck -> sem erros nos ficheiros app/services.
+SERVIDOR: expo start --web em http://localhost:8081

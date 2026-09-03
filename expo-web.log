@@ -1,0 +1,30 @@
+Starting project at C:\Users\JAMPONES\3D Objects\kulonga
+Starting Metro Bundler
+The following packages should be updated for best compatibility with the installed expo version:
+  expo@54.0.35 - expected version: ~54.0.37
+  expo-constants@18.0.13 - expected version: ~18.0.14
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web .\index.ts ▓▓░░░░░░░░░░░░░░ 14.5% (111/305)
+Web .\index.ts ▓▓▓▓▓▓░░░░░░░░░░ 43.6% (356/539)
+Web .\index.ts ▓▓▓▓▓▓▓▓▓░░░░░░░ 61.5% (674/864)
+Web .\index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░ 84.7% (1003/1116)
+Web .\index.ts ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1512/1512)
+Web Bundled 18837ms index.ts (1512 modules)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 176ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 269ms index.ts (1 module)
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 208ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 193ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console
+Web .\index.ts ░░░░░░░░░░░░░░░░  0.0% (0/1)
+Web Bundled 254ms index.ts (1 module)
+ LOG  [web] Logs will appear in the browser console

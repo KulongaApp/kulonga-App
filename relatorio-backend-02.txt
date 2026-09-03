@@ -1,0 +1,284 @@
+================================================================================
+                    KULONGA — RELATÓRIO BACKEND 02
+                    Memória de Trabalho / Continuação
+                    Data: 27/08/2026 — 21:30
+================================================================================
+
+ESTADO ACTUAL: Frontend COMPLETO, Supabase LIGADO, tabelas PENDENTES
+
+================================================================================
+1. O QUE JÁ FOI FEITO (RESUMO RÁPIDO)
+================================================================================
+
+✅ FASE 1 — FRONTEND COMPLETO (35 telas no total)
+
+  TELAS CRIADAS NESTA SESSÃO:
+  [x] app/(auth)/cadastro-escola.tsx      → Registar escola (director)
+  [x] app/(auth)/cadastro-professor.tsx   → Auto-registo professor
+  [x] app/(auth)/recuperar-senha.tsx      → Recuperação de senha por email
+  [x] app/(secretaria)/aluno-[id].tsx     → Detalhe do aluno + token
+  [x] app/(secretaria)/turma-[id].tsx     → Detalhe da turma + disciplinas
+  [x] app/(secretaria)/disciplinas.tsx    → Gestão de disciplinas
+  [x] app/(professor)/editar-perfil.tsx   → Editar perfil professor
+  [x] app/(encarregado)/editar-perfil.tsx → Editar perfil encarregado
+  [x] app/(secretaria)/editar-perfil.tsx  → Editar perfil secretaria + escola
+  [x] app/(encarregado)/boletim.tsx       → Boletim completo por trimestre
+
+  NAVEGAÇÃO ACTUALIZADA:
+  [x] escolher-perfil.tsx  → botão "Criar conta de escola"
+  [x] login-professor.tsx  → "Regista-te como professor" + "Esqueci a senha"
+  [x] login-secretaria.tsx → "Registar escola" + "Esqueci a senha"
+  [x] _layout secretaria   → aba "Disciplinas" adicionada
+  [x] _layout encarregado  → aba "Boletim" adicionada
+
+✅ FASE 2 — SUPABASE LIGADO
+
+  [x] services/supabase.ts → Credenciais reais colocadas
+  [x] app.json → scheme "kulonga" + extra com credenciais
+
+  Projecto: KulongaApp's Project
+  URL: https://iszrvyjmiwshcybccuwz.supabase.co
+  Anon Key: sb_publishable_QuDZ7Ve4z6oBEkz_V8aJcQ_i22HdqlW
+  Palavra-passe BD: v9NR$PD?RK6QvCz
+
+================================================================================
+2. ONDE PARÁMOS — PRÓXIMA ACÇÃO
+================================================================================
+
+ESTAMOS NA FASE 3 — SCHEMA DA BASE DE DADOS
+
+O PRÓXIMO PASSO É:
+  1. Abrir o Supabase Dashboard (https://supabase.com/dashboard)
+  2. Ir a SQL Editor → New Query
+  3. Copiar o SQL do plano-execucao-backend.txt (FASE 3)
+  4. Colar e executar
+
+O SQL JÁ ESTÁ PRONTO NO FICHEIRO:
+  → plano-execucao-backend.txt
+  → Secção "FASE 3 — SCHEMA DA BASE DE DADOS (SQL)"
+  → Inclui: 13 tabelas + views + RLS + storage
+
+================================================================================
+3. TODO O TRABALHO JÁ REALIZADO (DETALHADO)
+================================================================================
+
+FICHEIROS CRIADOS:
+  📄 app/(auth)/cadastro-escola.tsx
+  📄 app/(auth)/cadastro-professor.tsx
+  📄 app/(auth)/recuperar-senha.tsx
+  📄 app/(secretaria)/aluno-[id].tsx
+  📄 app/(secretaria)/turma-[id].tsx
+  📄 app/(secretaria)/disciplinas.tsx
+  📄 app/(professor)/editar-perfil.tsx
+  📄 app/(encarregado)/editar-perfil.tsx
+  📄 app/(secretaria)/editar-perfil.tsx
+  📄 app/(encarregado)/boletim.tsx
+  📄 relatorio-backend-01.txt
+  📄 relatorio-backend-02.txt (este ficheiro)
+  📄 plano-execucao-backend.txt
+
+FICHEIROS ACTUALIZADOS:
+  📄 services/supabase.ts → Credenciais reais
+  📄 app.json → scheme + extra
+  📄 app/(auth)/escolher-perfil.tsx → Botão cadastro escola
+  📄 app/(auth)/login-professor.tsx → Links registo + recuperação
+  📄 app/(auth)/login-secretaria.tsx → Links registo + recuperação
+  📄 app/(secretaria)/_layout.tsx → Aba disciplinas
+  📄 app/(encarregado)/_layout.tsx → Aba boletim
+
+================================================================================
+4. FASE 3 — O QUE FAZER AGORA (SQL)
+================================================================================
+
+PASSO 3.1: Activar extensões
+  → Dashboard → Database → Extensions
+  → Activar:
+      [x] pgcrypto
+      [x] pg_trgm
+      [x] unaccent
+
+PASSO 3.2: Criar tabelas
+  → Dashboard → SQL Editor → New Query
+  → Copiar o SQL completo do plano-execucao-backend.txt
+  → Executar
+
+  TABELAS A CRIAR:
+    1. escolas
+    2. professores
+    3. alunos
+    4. turmas
+    5. disciplinas
+    6. turma_alunos
+    7. turma_disciplinas
+    8. disciplina_professor
+    9. notas
+    10. encarregados
+    11. encarregado_aluno
+    12. tokens_acesso
+    13. notas_pendentes
+
+PASSO 3.3: Criar VIEW
+  → notas_vigentes (hierarquia de papéis)
+
+PASSO 3.4: Activar RLS
+  → Políticas para cada tabela
+
+PASSO 3.5: Criar Storage
+  → Bucket: fotos-alunos
+
+================================================================================
+5. FASE 4 — DEPOIS DO SQL (DES comentar services)
+================================================================================
+
+PASSO 4.1: services/auth.ts
+  → Descomentar loginComEmail()
+  → Descomentar validarTokenEncarregado()
+  → Descomentar verificarSessao()
+  → Descomentar logout()
+  → Remover mocks
+
+PASSO 4.2: services/notas.ts
+  → Descomentar buscarNotasAluno()
+  → Descomentar gerarTokenAluno()
+
+PASSO 4.3: Ligar login nas telas
+  → login-professor.tsx → usar loginComEmail()
+  → login-secretaria.tsx → usar loginComEmail()
+  → token-encarregado.tsx → usar validarTokenEncarregado()
+  → cadastro-escola.tsx → usar supabase.auth.signUp()
+  → cadastro-professor.tsx → usar supabase.auth.signUp()
+
+================================================================================
+6. FASE 5 — SERVICES NOVOS (CRIAR DO ZERO)
+================================================================================
+
+  [ ] services/escolas.ts
+  [ ] services/professores.ts
+  [ ] services/alunos.ts
+  [ ] services/turmas.ts
+  [ ] services/disciplinas.ts
+  [ ] services/boletim.ts
+
+================================================================================
+7. FASE 6 — WATERMELONDB (OFFLINE)
+================================================================================
+
+  [ ] db/index.ts (inicialização)
+  [ ] db/schema.ts (schema local)
+  [ ] db/models/*.ts (8 modelos)
+  [ ] db/sync.ts (sincronização)
+
+================================================================================
+8. FASE 7 — TESTES
+================================================================================
+
+  [ ] Auth com Supabase real
+  [ ] CRUD de dados
+  [ ] Lançamento de notas
+  [ ] Tokens
+  [ ] Offline
+
+================================================================================
+9. CREDENCIAIS E ACCESSOS
+================================================================================
+
+SUPABASE DASHBOARD:
+  → https://supabase.com/dashboard/project/iszrvyjmiwshcybccuwz
+  → Email: (o teu email de registo no Supabase)
+  → Password: v9NR$PD?RK6QvCz
+
+SUPABASE CLI:
+  → supabase login
+  → supabase init
+  → supabase link --project-ref iszrvyjmiwshcybccuwz
+
+MOCKS DE TESTE (app ainda usa mocks):
+  → Professor: prof@kulonga.ao / 123456
+  → Secretaria: sec@kulonga.ao / 123456
+  → Token: 123456
+
+================================================================================
+10. NOTAS IMPORTANTES
+================================================================================
+
+- O frontend está COMPLETO com mocks — não precisa de mais telas
+- O Supabase está LIGADO mas sem tabelas — precisa do SQL
+- O SQL completo está no plano-execucao-backend.txt
+- Depois do SQL, descomentar services e ligar às telas
+- WatermelonDB é a última fase (offline)
+- NUNCA committar a password do Supabase no git
+
+================================================================================
+11. ESTRUTURA DO PROJECTO (para referência)
+================================================================================
+
+kulonga/
+├── app/
+│   ├── _layout.tsx
+│   ├── index.tsx
+│   ├── splash.tsx
+│   ├── (auth)/
+│   │   ├── _layout.tsx
+│   │   ├── cadastro-escola.tsx        ← NOVO
+│   │   ├── cadastro-professor.tsx     ← NOVO
+│   │   ├── recuperar-senha.tsx        ← NOVO
+│   │   ├── escolher-perfil.tsx
+│   │   ├── login-professor.tsx
+│   │   ├── login-secretaria.tsx
+│   │   ├── selector-perfil.tsx
+│   │   └── token-encarregado.tsx
+│   ├── (onboarding)/
+│   │   ├── _layout.tsx
+│   │   ├── provincia.tsx
+│   │   ├── lingua.tsx
+│   │   └── perfil.tsx
+│   ├── (professor)/
+│   │   ├── _layout.tsx
+│   │   ├── painel.tsx
+│   │   ├── turmas.tsx
+│   │   ├── lancar-notas.tsx
+│   │   ├── sync.tsx
+│   │   └── editar-perfil.tsx          ← NOVO
+│   ├── (encarregado)/
+│   │   ├── _layout.tsx
+│   │   ├── painel.tsx
+│   │   ├── contactos.tsx
+│   │   ├── perfil.tsx
+│   │   ├── boletim.tsx                ← NOVO
+│   │   └── editar-perfil.tsx          ← NOVO
+│   └── (secretaria)/
+│       ├── _layout.tsx
+│       ├── painel.tsx
+│       ├── gerar-token.tsx
+│       ├── adicionar-professor.tsx
+│       ├── alunos.tsx
+│       ├── disciplinas.tsx            ← NOVO
+│       ├── aluno-[id].tsx             ← NOVO
+│       ├── turma-[id].tsx             ← NOVO
+│       └── editar-perfil.tsx          ← NOVO
+├── components/
+│   ├── index.ts
+│   ├── ui/ (Button, Card, Input, Badge)
+│   ├── TabBar.tsx
+│   └── ...
+├── services/
+│   ├── supabase.ts                    ← ACTUALIZADO com credenciais reais
+│   ├── auth.ts
+│   ├── notas.ts
+│   └── index.ts
+├── db/
+│   └── models/ (VAZIO)
+├── hooks/
+├── mocks/
+├── relatorio-backend-01.txt           ← RELATÓRIO 1
+├── relatorio-backend-02.txt           ← RELATÓRIO 2 (este)
+├── plano-execucao-backend.txt         ← PLANO COM SQL COMPLETO
+├── app.json                           ← ACTUALIZADO
+├── package.json
+└── ...
+
+================================================================================
+FIM DA MEMÓRIA — KULONGA v1.0.0
+Continuar amanhã na Fase 3 (SQL das tabelas)
+© 2025 Custódio Cahilo — Lukashi
+================================================================================

@@ -1,0 +1,97 @@
+================================================================================
+                    KULONGA — RELATÓRIO BACKEND 03
+                    Estado / Continuação — FASE 3 + FASE 4
+                    Data: 28/08/2026
+================================================================================
+
+ESTADO ACTUAL: FASE 3 CONCLUÍDA (com correções), FASE 4 EM CURSO
+
+--------------------------------------------------------------------------------
+1. FASE 3 — SCHEMA DA BD (CONCLUÍDA + CORRIGIDA)
+--------------------------------------------------------------------------------
+Executado no Dashboard SQL Editor. Ficheiros criados:
+  📄 schema-kulonga-run.sql        → SQL puro, executável (versão final)
+  📄 fix-rls-functions.sql         → PATCH 1 (funções SECURITY DEFINER)
+  📄 fix-rls-encarregados.sql      → PATCH 2 (quebra recursão encarregados)
+
+BUGS ENCONTRADOS E CORRIGIDOS (importante para quem continua):
+  BUG A (recursão RLS geral): as funções escolas_do_staff() e
+    alunos_do_encarregado() liam tabelas com RLS -> recursão infinita -> 500.
+    CORREÇÃO: tornadas SECURITY DEFINER SET search_path=public.
+  BUG B (recursão mútua): encarregados_staff lia encarregado_aluno e
+    encarregado_aluno_staff lia encarregados -> ciclo -> 500.
+    CORREÇÃO: nova função meus_encarregados() SECURITY DEFINER; policies
+    reescritas sem referência cruzada.
+
+VERIFICAÇÃO (via REST API anon):
+  ✅ 14/14 tabelas+view retornam 200 (escolas, professores, alunos, turmas,
+    disciplinas, turma_alunos, turma_disciplinas, disciplina_professor, notas,
+    encarregados, encarregado_aluno, tokens_acesso, notas_pendentes,
+    notas_vigentes)
+  ✅ INSERT como anon -> 401 (RLS a bloquear escrita sem sessão)
+
+--------------------------------------------------------------------------------
+2. FASE 4 — SERVICES EXISTENTES (PARCIAL)
+--------------------------------------------------------------------------------
+CONCLUÍDO:
+  📄 services/auth.ts
+     - loginComEmail()        → usa supabase.auth.signInWithPassword (real)
+     - validarTokenEncarregado() → usa tabela tokens_acesso (real)
+     - verificarSessao()      → usa supabase.auth.getSession (real)
+     - logout()               → supabase.auth.signOut + limpa AsyncStorage
+     - Mocks removidos
+  📄 services/notas.ts
+     - buscarNotasAluno()     → usa view notas_vigentes (Real)
+     - gerarTokenAluno()      → insere em tokens_acesso (Real)
+     - lancarNota()           → MANTÉM mock (precisa WatermelonDB — FASE 6)
+
+TELAS LIGADAS AO SUPABASE:
+  📄 app/(auth)/login-professor.tsx    → loginComEmail()
+  📄 app/(auth)/login-secretaria.tsx   → loginComEmail()
+  📄 app/(auth)/token-encarregado.tsx  → validarTokenEncarregado()
+  (cadastro-escola / cadastro-professor → PENDENTE, ver FASE 5)
+
+--------------------------------------------------------------------------------
+3. PRÓXIMO PASSO (FASE 5 — SERVICES NOVOS)
+--------------------------------------------------------------------------------
+Criar em services/:
+  [ ] escolas.ts      → criarEscola, buscarEscola, actualizarEscola, listarEscolas
+  [ ] professores.ts  → adicionarProfessor, listarProfessores, buscarProfessor,
+                         actualizarProfessor, removerProfessor, atribuirDisciplina
+  [ ] alunos.ts       → adicionarAluno, listarAlunos, buscarAluno, actualizarAluno,
+                         removerAluno, matricularAluno, desmatricularAluno
+  [ ] turmas.ts       → criarTurma, listarTurmas, buscarTurma, actualizarTurma,
+                         removerTurma, listarAlunosTurma
+  [ ] disciplinas.ts  → adicionarDisciplina, listarDisciplinas, buscarDisciplina,
+                         actualizarDisciplina, removerDisciplina
+  [ ] boletim.ts      → gerarBoletimAluno, gerarBoletimTurma, calcularMedia
+
+DEPOIS da FASE 5: ligar cadastro-escola/cadastro-professor (usam signUp +
+  supabase.from('escolas'/'professores').insert com user_metadata.papeis).
+
+--------------------------------------------------------------------------------
+4. NOTAS PARA TESTES (FASE 7)
+--------------------------------------------------------------------------------
+Para testar login real é PRECISO criar utilizadores no Supabase Auth:
+  Dashboard → Authentication → Add user (ou signUp pela app):
+    - secretaria: sec@kulonga.ao / 123456  (user_metadata: papeis=["secretaria"])
+    - professor:  prof@kulonga.ao / 123456  (user_metadata: papeis=["professor"])
+  O signUp da app deve gravar user_metadata: { papeis: [...] } para o RLS funcionar.
+  Confirmar em Authentication → Providers → Email que "Confirm email" está off
+  (ou usar utilizadores criados manualmente pela Dashboard).
+
+--------------------------------------------------------------------------------
+5. FICHEIROS DO PROJECTO (hoje)
+--------------------------------------------------------------------------------
+  plano-execucao-backend.txt      (original — tem SQL com bugs conhecidos)
+  relatorio-backend-01.txt
+  relatorio-backend-02.txt
+  relatorio-backend-03.txt         (este)
+  schema-kulonga.sql               (versão documentada, com comentários)
+  schema-kulonga-run.sql           (SQL PURO executável — usar este)
+  fix-rls-functions.sql            (PATCH 1)
+  fix-rls-encarregados.sql         (PATCH 2)
+
+================================================================================
+FIM — continuar na FASE 5 (services novos)
+================================================================================

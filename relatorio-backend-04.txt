@@ -1,0 +1,64 @@
+================================================================================
+                    KULONGA — RELATÓRIO BACKEND 04
+                    FASE 5 (services) + Cadastro ligado
+                    Data: 28/08/2026
+================================================================================
+
+ESTADO: FASE 5 CONCLUÍDA (services criados). Cadastro-escola/professor LIGADOS.
+
+--------------------------------------------------------------------------------
+1. FICHEIROS NOVOS (services)
+--------------------------------------------------------------------------------
+  📄 services/escolas.ts      → registarEscola (RPC), buscarEscola, actualizarEscola, listarEscolas
+  📄 services/professores.ts  → registarProfessor (RPC), adicionarProfessor, listarProfessores,
+                                 buscarProfessor, actualizarProfessor, removerProfessor, atribuirDisciplina
+  📄 services/alunos.ts       → adicionarAluno, listarAlunos, buscarAluno, actualizarAluno,
+                                 removerAluno, matricularAluno, desmatricularAluno
+  📄 services/turmas.ts       → criarTurma, listarTurmas, buscarTurma, actualizarTurma,
+                                 removerTurma, listarAlunosTurma
+  📄 services/disciplinas.ts  → adicionarDisciplina, listarDisciplinas, buscarDisciplina,
+                                 actualizarDisciplina, removerDisciplina
+  📄 services/boletim.ts      → gerarBoletimAluno, gerarBoletimTurma, calcularMedia
+  📄 services/index.ts        → exporta todos os services acima
+
+--------------------------------------------------------------------------------
+2. PATCH SQL OBRIGATÓRIO (bootstrap de RLS)
+--------------------------------------------------------------------------------
+  📄 fix-cadastro-rpc.sql  → CORRER NO DASHBOARD SQL EDITOR
+     - política escolas_listar (SELECT público p/ listar escolas)
+     - função registar_escola(uuid)  SECURITY DEFINER
+     - função registar_professor(uuid) SECURITY DEFINER
+     Depois: NOTIFY pgrst, 'reload schema';
+
+  MOTIVO: o director ao registar ainda não é "staff" → RLS bloqueava o INSERT.
+  As RPCs SECURITY DEFINER gravam user_id = auth.uid() e criam escola+professor.
+
+--------------------------------------------------------------------------------
+3. TELAS LIGADAS
+--------------------------------------------------------------------------------
+  📄 app/(auth)/cadastro-escola.tsx   → supabase.auth.signUp + registarEscola()
+  📄 app/(auth)/cadastro-professor.tsx→ supabase.auth.signUp + registarProfessor() + picker de escola
+
+--------------------------------------------------------------------------------
+4. IMPORTANTE — CONFIRMAÇÃO DE EMAIL
+--------------------------------------------------------------------------------
+  No Supabase Dashboard → Authentication → Providers → Email:
+  desliga "Confirm email" (senão o signUp não cria sessão e o RPC falha com
+  'sem sessao'). Para produção, usar convites/magic-link em vez de signUp aberto.
+
+--------------------------------------------------------------------------------
+5. PRÓXIMO PASSO (telas de CRUD ainda com mock)
+--------------------------------------------------------------------------------
+  Estas telas AINDA usam mocks — falta ligar aos services novos:
+    [ ] app/(secretaria)/alunos.tsx
+    [ ] app/(secretaria)/disciplinas.tsx
+    [ ] app/(secretaria)/adicionar-professor.tsx
+    [ ] app/(secretaria)/gerar-token.tsx
+    [ ] app/(professor)/lancar-notas.tsx
+    [ ] app/(encarregado)/boletim.tsx
+    [ ] painéis (secretaria/professor/encarregado) — usar dados reais
+    [ ] FASE 6 — WatermelonDB (offline) p/ lancarNota()
+
+================================================================================
+FIM — correr fix-cadastro-rpc.sql e testar o cadastro
+================================================================================

@@ -1,0 +1,626 @@
+================================================================================
+              KULONGA — PLANO DE EXECUÇÃO DO BACKEND
+              Criação do Banco de Dados + Services
+              Data: 27/08/2026
+================================================================================
+
+OBJECTIVO: Implementar todo o backend com Supabase, criar o schema da BD,
+           descomentar services existentes e criar os que faltam.
+
+ORDEM DE TRABALHO: Frontend primeiro → Depois Backend
+
+================================================================================
+FASE 1 — TERMINAR O FRONTEND (TELAS QUE FALTAM)
+================================================================================
+
+PASSO 1.1: Tela de cadastro de escola
+  → app/(auth)/cadastro-escola.tsx
+      Formulário: nome escola, província, município, dirección,
+                   email, telefone, nome do director
+      → Criar escola (mock por agora)
+      → Criar utilizador director (mock)
+      → Criar primeiro professor (o director)
+      → Redirecionar para login
+      LIGAR A: services/auth.ts (depois do Supabase)
+
+PASSO 1.2: Tela de cadastro de professor
+  → app/(auth)/cadastro-professor.tsx
+      Formulário: nome, email, telefone, disciplinas
+      → Criar professor (mock por agora)
+      → Redirecionar para login
+      LIGAR A: services/professores.ts (depois do Supabase)
+
+PASSO 1.3: Detalhe de aluno
+  → app/(secretaria)/aluno-[id].tsx
+      Foto, dados pessoais, turma, notas, tokens
+      → Editar aluno
+      → Gerar token
+      → Ver notas do aluno
+      LIGAR A: services/alunos.ts (depois do Supabase)
+
+PASSO 1.4: Detalhe de turma
+  → app/(secretaria)/turma-[id].tsx
+      Lista de alunos inscritos
+      Disciplinas da turma
+      Coordenador
+      → Adicionar/remover alunos
+      → Atribuir disciplinas
+      LIGAR A: services/turmas.ts (depois do Supabase)
+
+PASSO 1.5: Gestão de disciplinas
+  → app/(secretaria)/disciplinas.tsx
+      Lista de disciplinas da escola
+      → Adicionar disciplina
+      → Editar disciplina
+      → Atribuir a professor
+      LIGAR A: services/disciplinas.ts (depois do Supabase)
+
+PASSO 1.6: Boletim do aluno
+  → app/(encarregado)/boletim.tsx
+      Notas completas por trimestre (1º, 2º, 3º)
+      Média anual por disciplina
+      Estado final (aprovado/reprovado)
+      → Exportar PDF (futuro)
+      LIGAR A: services/boletim.ts (depois do Supabase)
+
+PASSO 1.7: Editar perfil próprio
+  → app/(professor)/editar-perfil.tsx
+      Nome, email, telefone, foto
+      → Alterar senha
+  → app/(encarregado)/editar-perfil.tsx
+      Nome, telefone
+  → app/(secretaria)/editar-perfil.tsx
+      Nome, email, telefone, foto da escola
+      LIGAR A: services/auth.ts (depois do Supabase)
+
+PASSO 1.8: Tela de recuperação de senha
+  → app/(auth)/recuperar-senha.tsx
+      Formulário: email
+      → Enviar email de recuperação (Supabase Auth)
+      → Mostrar mensagem de confirmação
+      LIGAR A: Supabase Auth (depois do Supabase)
+
+PASSO 1.9: Actualizar navegação
+  → app/(auth)/escolher-perfil.tsx
+      Adicionar botão "Criar conta de escola"
+      → Redirecionar para cadastro-escola
+  → app/(auth)/login-professor.tsx
+      Adicionar botão "Não tens conta? Regista-te"
+      → Redirecionar para cadastro-professor
+  → app/(auth)/login-secretaria.tsx
+      Adicionar botão "Não tens conta? Regista-te"
+      → Redirecionar para cadastro-escola
+
+CHECKLIST FASE 1 — FRONTEND
+  [x] cadastro-escola.tsx criado
+  [x] cadastro-professor.tsx criado
+  [x] aluno-[id].tsx criado
+  [x] turma-[id].tsx criado
+  [x] disciplinas.tsx criado
+  [x] boletim.tsx criado
+  [x] editar-perfil.tsx (professor) criado
+  [x] editar-perfil.tsx (encarregado) criado
+  [x] editar-perfil.tsx (secretaria) criado
+  [x] recuperar-senha.tsx criado
+  [x] Navegação actualizada
+  [x] Todas as telas com mocks a funcionar
+
+================================================================================
+FASE 2 — SETUP INICIAL DO SUPABASE
+================================================================================
+
+PASSO 2.1: Criar projecto
+  → Ir a https://supabase.com
+  → Criar conta (ou login)
+  → Criar novo projecto "kulonga"
+  → Registar a Password do banco de dados
+  ✅ CONCLUÍDO: Projecto "KulongaApp's Project" criado
+
+PASSO 2.2: Copiar credenciais
+  → Dashboard → Settings → API
+  → Copiar Project URL (https://xxxxx.supabase.co)
+  → Copiar anon (public) key
+  → Colar em: services/supabase.ts
+  ✅ CONCLUÍDO: services/supabase.ts actualizado com credenciais reais
+
+PASSO 2.3: Activar extensões
+  → Dashboard → Database → Extensions
+  → Activar:
+      [x] pgcrypto      (para gen_random_uuid)
+      [x] pg_trgm       (para pesquisas com acentos)
+      [x] unaccent      (para normalizar texto)
+
+================================================================================
+FASE 3 — SCHEMA DA BASE DE DADOS (SQL)
+================================================================================
+
+PASSO 3.1: Criar tabelas
+  → Dashboard → SQL Editor → New Query
+  → Copiar e colar o SQL abaixo
+  → Executar
+
+────────────────────────────────────────────────────────────────────────────────
+SQL COMPLETO — TABELAS
+────────────────────────────────────────────────────────────────────────────────
+
+-- 1. TABELA ESCOLAS
+CREATE TABLE IF NOT EXISTS escolas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome TEXT NOT NULL,
+  provincia TEXT NOT NULL,
+  municipio TEXT,
+  endereco TEXT,
+  telefone TEXT,
+  email TEXT,
+  direccao_nome TEXT,
+  direccao_telefone TEXT,
+  criada_em TIMESTAMPTZ DEFAULT now(),
+  actualizada_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. TABELA PROFESSORES
+CREATE TABLE IF NOT EXISTS professores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  escola_id UUID NOT NULL REFERENCES escolas(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,
+  email TEXT NOT NULL,
+  telefone TEXT,
+  disciplinas TEXT[],  -- array de disciplinas que lecciona
+  activo BOOLEAN DEFAULT true,
+  criado_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 3. TABELA ALUNOS
+CREATE TABLE IF NOT EXISTS alunos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  escola_id UUID NOT NULL REFERENCES escolas(id) ON DELETE CASCADE,
+  nome_completo TEXT NOT NULL,
+  data_nascimento DATE,
+  genero TEXT CHECK (genero IN ('M', 'F')),
+  foto_url TEXT,
+  telefone TEXT,
+  endereco TEXT,
+  criado_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 4. TABELA TURMAS
+CREATE TABLE IF NOT EXISTS turmas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  escola_id UUID NOT NULL REFERENCES escolas(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,           -- ex: "8ªB", "10ªA"
+  ano_lectivo TEXT NOT NULL,    -- ex: "2025/2026"
+  serie TEXT,                   -- ex: "8ª classe"
+  turno TEXT,                   -- ex: "Manhã", "Tarde"
+  coordenador_id UUID REFERENCES professores(id),
+  criada_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 5. TABELA DISCIPLINAS
+CREATE TABLE IF NOT EXISTS disciplinas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  escola_id UUID NOT NULL REFERENCES escolas(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,           -- ex: "Matemática"
+  codigo TEXT,                  -- ex: "MAT"
+  criada_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 6. RELAÇÃO TURMA-ALUNOS (matrícula)
+CREATE TABLE IF NOT EXISTS turma_alunos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  turma_id UUID NOT NULL REFERENCES turmas(id) ON DELETE CASCADE,
+  aluno_id UUID NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  matriculado_em TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(turma_id, aluno_id)
+);
+
+-- 7. RELAÇÃO TURMA-DISCIPLINAS
+CREATE TABLE IF NOT EXISTS turma_disciplinas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  turma_id UUID NOT NULL REFERENCES turmas(id) ON DELETE CASCADE,
+  disciplina_id UUID NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
+  UNIQUE(turma_id, disciplina_id)
+);
+
+-- 8. RELAÇÃO DISCIPLINA-PROFESSOR
+CREATE TABLE IF NOT EXISTS disciplina_professor (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  disciplina_id UUID NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
+  professor_id UUID NOT NULL REFERENCES professores(id) ON DELETE CASCADE,
+  turma_id UUID NOT NULL REFERENCES turmas(id) ON DELETE CASCADE,
+  UNIQUE(disciplina_id, professor_id, turma_id)
+);
+
+-- 9. TABELA NOTAS
+CREATE TABLE IF NOT EXISTS notas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aluno_id UUID NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  disciplina_id UUID NOT NULL REFERENCES disciplinas(id),
+  turma_id UUID NOT NULL REFERENCES turmas(id),
+  trimestre SMALLINT NOT NULL CHECK (trimestre IN (1, 2, 3)),
+  tipo TEXT NOT NULL CHECK (tipo IN ('frequencia', 'prova', 'exame')),
+  valor NUMERIC(4,2) NOT NULL CHECK (valor >= 0 AND valor <= 20),
+  autor_id UUID NOT NULL,       -- user_id de quem lançou
+  autor_papel TEXT NOT NULL CHECK (autor_papel IN ('professor', 'coordenador', 'secretaria')),
+  lancado_em TIMESTAMPTZ DEFAULT now(),
+  actualizado_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 10. TABELA ENCARRGADOS
+CREATE TABLE IF NOT EXISTS encarregados (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,
+  telefone TEXT,
+  criado_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 11. RELAÇÃO ENCARRGADO-ALUNO
+CREATE TABLE IF NOT EXISTS encarregado_aluno (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  encarregado_id UUID NOT NULL REFERENCES encarregados(id) ON DELETE CASCADE,
+  aluno_id UUID NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  parentesco TEXT,              -- ex: "Pai", "Mãe", "Avó"
+  UNIQUE(encarregado_id, aluno_id)
+);
+
+-- 12. TABELA TOKENS DE ACESSO
+CREATE TABLE IF NOT EXISTS tokens_acesso (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aluno_id UUID NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  codigo TEXT NOT NULL UNIQUE,  -- 6 dígitos
+  qr_hash TEXT,
+  ativo BOOLEAN DEFAULT true,
+  expira_em TIMESTAMPTZ,
+  gerado_por UUID,             -- user_id da secretaria
+  criado_em TIMESTAMPTZ DEFAULT now()
+);
+
+-- 13. TABELA NOTAS PENDENTES (sync offline)
+CREATE TABLE IF NOT EXISTS notas_pendentes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aluno_id UUID NOT NULL,
+  disciplina_id UUID NOT NULL,
+  turma_id UUID NOT NULL,
+  trimestre SMALLINT NOT NULL,
+  tipo TEXT NOT NULL,
+  valor NUMERIC(4,2) NOT NULL,
+  autor_id UUID NOT NULL,
+  autor_papel TEXT NOT NULL,
+  status TEXT DEFAULT 'pendente' CHECK (status IN ('pendente', 'sync', 'erro')),
+  lancado_em TIMESTAMPTZ DEFAULT now(),
+  sincronizado_em TIMESTAMPTZ
+);
+
+────────────────────────────────────────────────────────────────────────────────
+SQL COMPLETO — VIEWS
+────────────────────────────────────────────────────────────────────────────────
+
+-- VIEW: Notas vigentes (aplica hierarquia de papéis)
+-- secretaria(3) > coordenador(2) > professor(1)
+-- Em empate: nota mais recente vence
+CREATE OR REPLACE VIEW notas_vigentes AS
+WITH notas_com_rank AS (
+  SELECT
+    n.*,
+    d.nome AS disciplina_nome,
+    p.nome AS professor_nome,
+    p.telefone AS professor_telefone,
+    ROW_NUMBER() OVER (
+      PARTITION BY n.aluno_id, n.disciplina_id, n.trimestre, n.tipo
+      ORDER BY
+        CASE n.autor_papel
+          WHEN 'secretaria' THEN 3
+          WHEN 'coordenador' THEN 2
+          WHEN 'professor' THEN 1
+        END DESC,
+        n.actualizado_em DESC
+    ) AS rank
+  FROM notas n
+  JOIN disciplinas d ON d.id = n.disciplina_id
+  LEFT JOIN professores p ON p.id = n.autor_id
+)
+SELECT * FROM notas_com_rank WHERE rank = 1;
+
+────────────────────────────────────────────────────────────────────────────────
+SQL COMPLETO — RLS (Row Level Security)
+────────────────────────────────────────────────────────────────────────────────
+
+-- Activar RLS em todas as tabelas
+ALTER TABLE escolas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE professores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE alunos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE turmas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disciplinas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE turma_alunos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE turma_disciplinas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE disciplina_professor ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE encarregados ENABLE ROW LEVEL SECURITY;
+ALTER TABLE encarregado_aluno ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tokens_acesso ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notas_pendentes ENABLE ROW LEVEL SECURITY;
+
+-- POLÍTICAS: Secretaria vê tudo da escola
+CREATE POLICY "secretaria_ver_tudo" ON escolas
+  FOR ALL USING (auth.uid() IN (
+    SELECT user_id FROM professores WHERE escola_id = escolas.id
+    AND 'secretaria' = ANY(
+      SELECT jsonb_array_elements_text(
+        (SELECT user_metadata FROM auth.users WHERE id = auth.uid())
+      )
+    )
+  ));
+
+-- POLÍTICAS: Professor vê as suas turmas e notas
+CREATE POLICY "professor_ver_turmas" ON turmas
+  FOR SELECT USING (id IN (
+    SELECT turma_id FROM disciplina_professor WHERE professor_id IN (
+      SELECT id FROM professores WHERE user_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "professor_ver_notas" ON notas
+  FOR SELECT USING (turma_id IN (
+    SELECT turma_id FROM disciplina_professor WHERE professor_id IN (
+      SELECT id FROM professores WHERE user_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "professor_lancar_notas" ON notas
+  FOR INSERT WITH CHECK (autor_id = auth.uid());
+
+-- POLÍTICAS: Encarregado vê apenas o seu aluno
+CREATE POLICY "encarregado_ver_aluno" ON notas
+  FOR SELECT USING (aluno_id IN (
+    SELECT aluno_id FROM encarregado_aluno WHERE encarregado_id IN (
+      SELECT id FROM encarregados WHERE user_id = auth.uid()
+    )
+  ));
+
+CREATE POLICY "encarregado_ver_aluno_info" ON alunos
+  FOR SELECT USING (id IN (
+    SELECT aluno_id FROM encarregado_aluno WHERE encarregado_id IN (
+      SELECT id FROM encarregados WHERE user_id = auth.uid()
+    )
+  ));
+
+-- POLÍTICAS: Tokens — qualquer um pode validar (lectura)
+CREATE POLICY "validar_token" ON tokens_acesso
+  FOR SELECT USING (ativo = true);
+
+-- POLÍTICAS: Secretaria pode gerar tokens
+CREATE POLICY "secretaria_gerar_token" ON tokens_acesso
+  FOR INSERT WITH CHECK (gerado_por = auth.uid());
+
+-- POLÍTICAS: Notas pendentes — cada utilizador vê as suas
+CREATE POLICY "ver_notas_pendentes" ON notas_pendentes
+  FOR SELECT USING (autor_id = auth.uid());
+
+CREATE POLICY "criar_notas_pendentes" ON notas_pendentes
+  FOR INSERT WITH CHECK (autor_id = auth.uid());
+
+CREATE POLICY "actualizar_notas_pendentes" ON notas_pendentes
+  FOR UPDATE USING (autor_id = auth.uid());
+
+────────────────────────────────────────────────────────────────────────────────
+SQL COMPLETO — STORAGE
+────────────────────────────────────────────────────────────────────────────────
+
+-- Criar bucket para fotos dos alunos
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('fotos-alunos', 'fotos-alunos', true);
+
+-- Política: qualquer utilizador autenticado pode fazer upload
+CREATE POLICY "upload_foto_aluno" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'fotos-alunos'
+    AND auth.role() = 'authenticated'
+  );
+
+-- Política: qualquer um pode ver as fotos (bucket público)
+CREATE POLICY "ver_fotos_alunos" ON storage.objects
+  FOR SELECT USING (bucket_id = 'fotos-alunos');
+
+================================================================================
+FASE 4 — DESCOMENTAR SERVICES EXISTENTES
+================================================================================
+
+PASSO 4.1: services/auth.ts
+  → Descomentar loginComEmail() (linhas 23-34)
+  → Descomentar validarTokenEncarregado() (linhas 72-84)
+  → Descomentar verificarSessao() (linhas 106-114)
+  → Descomentar logout() (linhas 132-133)
+  → Remover todos os mocks (bloco de teste)
+
+PASSO 4.2: services/notas.ts
+  → Descomentar buscarNotasAluno() (linhas 20-33)
+  → Descomentar lancarNota() — implementar WatermelonDB primeiro
+  → Descomentar sincronizarPendentes() — implementar motor de sync
+  → Descomentar gerarTokenAluno() (linhas 129-139)
+
+PASSO 4.3: Ligar login nas telas
+  → app/(auth)/login-professor.tsx → usar loginComEmail()
+  → app/(auth)/login-secretaria.tsx → usar loginComEmail()
+  → app/(auth)/token-encarregado.tsx → usar validarTokenEncarregado()
+  → app/(auth)/cadastro-escola.tsx → usar supabase.auth.signUp()
+  → app/(auth)/cadastro-professor.tsx → usar supabase.auth.signUp()
+
+================================================================================
+FASE 5 — CRIAR SERVICES NOVOS
+================================================================================
+
+PASSO 5.1: services/escolas.ts
+  → criarEscola(dados)
+  → buscarEscola(escolaId)
+  → actualizarEscola(escolaId, dados)
+  → listarEscolas()
+
+PASSO 5.2: services/professores.ts
+  → adicionarProfessor(dados)
+  → listarProfessores(escolaId)
+  → buscarProfessor(professorId)
+  → actualizarProfessor(professorId, dados)
+  → removerProfessor(professorId)
+  → atribuirDisciplina(professorId, disciplinaId, turmaId)
+
+PASSO 5.3: services/alunos.ts
+  → adicionarAluno(dados)
+  → listarAlunos(escolaId)
+  → buscarAluno(alunoId)
+  → actualizarAluno(alunoId, dados)
+  → removerAluno(alunoId)
+  → matricularAluno(alunoId, turmaId)
+  → desmatricularAluno(alunoId, turmaId)
+
+PASSO 5.4: services/turmas.ts
+  → criarTurma(dados)
+  → listarTurmas(escolaId)
+  → buscarTurma(turmaId)
+  → actualizarTurma(turmaId, dados)
+  → removerTurma(turmaId)
+  → listarAlunosTurma(turmaId)
+
+PASSO 5.5: services/disciplinas.ts
+  → adicionarDisciplina(dados)
+  → listarDisciplinas(escolaId)
+  → buscarDisciplina(disciplinaId)
+  → actualizarDisciplina(disciplinaId, dados)
+  → removerDisciplina(disciplinaId)
+
+PASSO 5.6: services/boletim.ts
+  → gerarBoletimAluno(alunoId, anoLectivo)
+  → gerarBoletimTurma(turmaId, anoLectivo)
+  → calcularMedia(alunoId, disciplinaId, trimestre)
+
+================================================================================
+FASE 6 — WATERMELONDB (OFFLINE)
+================================================================================
+
+PASSO 6.1: Configurar banco local
+  → Criar db/index.ts (inicialização do WatermelonDB)
+  → Criar db/schema.ts (schema local)
+
+PASSO 6.2: Criar modelos em db/models/
+  → db/models/Escola.ts
+  → db/models/Professor.ts
+  → db/models/Aluno.ts
+  → db/models/Turma.ts
+  → db/models/Disciplina.ts
+  → db/models/Nota.ts
+  → db/models/NotaPendente.ts
+  → db/models/TokenAcesso.ts
+
+PASSO 6.3: Implementar sync
+  → db/sync.ts — sincronizar com Supabase
+  → Services: ler de WatermelonDB quando offline
+  → Services: guardar em WatermelonDB + sync quando online
+
+================================================================================
+FASE 7 — TESTES
+================================================================================
+
+PASSO 7.1: Testes de autenticação
+  [ ] Login professor com Supabase real
+  [ ] Login secretaria com Supabase real
+  [ ] Token encarregado com Supabase real
+  [ ] Cadastro de escola funcional
+  [ ] Cadastro de professor funcional
+  [ ] Sessão persistente (não pede login de novo)
+  [ ] Logout completo
+
+PASSO 7.2: Testes de dados
+  [ ] Criar escola
+  [ ] Adicionar professor
+  [ ] Adicionar aluno
+  [ ] Criar turma
+  [ ] Adicionar disciplina
+  [ ] Matricular aluno em turma
+  [ ] Atribuir disciplina a professor
+
+PASSO 7.3: Testes de notas
+  [ ] Lançar nota (professor)
+  [ ] Ver nota (encarregado)
+  [ ] Ver boletim completo
+  [ ] Hierarquia de papéis (sec > coord > prof)
+  [ ] Sincronização offline→online
+
+PASSO 7.4: Testes de token
+  [ ] Gerar token (secretaria)
+  [ ] Validar token (encarregado)
+  [ ] Token expirado
+
+PASSO 7.5: Testes offline
+  [ ] Lançar notas sem internet
+  [ ] Ver dados em cache
+  [ ] Sincronizar quando voltar online
+
+================================================================================
+CHECKLIST GERAL — CADA FASE CONCLUÍDA
+================================================================================
+
+FASE 1 — Frontend (TELAS)
+  [x] cadastro-escola.tsx
+  [x] cadastro-professor.tsx
+  [x] aluno-[id].tsx
+  [x] turma-[id].tsx
+  [x] disciplinas.tsx
+  [x] boletim.tsx
+  [x] editar-perfil.tsx (professor)
+  [x] editar-perfil.tsx (encarregado)
+  [x] editar-perfil.tsx (secretaria)
+  [x] recuperar-senha.tsx
+  [x] Navegação actualizada
+
+FASE 2 — Setup Supabase
+  [x] Projecto criado
+  [x] Credenciais copiadas para supabase.ts
+  [ ] Extensões activadas
+
+FASE 3 — Schema da BD
+  [ ] Todas as tabelas criadas
+  [ ] Views criadas
+  [ ] RLS configurado
+  [ ] Storage configurado
+
+FASE 4 — Services existentes
+  [ ] auth.ts descomentado
+  [ ] notas.ts descomentado
+  [ ] Login ligado ao Supabase
+  [ ] Cadastro ligado ao Supabase
+
+FASE 5 — Services novos
+  [ ] escolas.ts
+  [ ] professores.ts
+  [ ] alunos.ts
+  [ ] turmas.ts
+  [ ] disciplinas.ts
+  [ ] boletim.ts
+
+FASE 6 — WatermelonDB
+  [ ] Modelos criados
+  [ ] Schema local
+  [ ] Sync implementado
+
+FASE 7 — Testes
+  [ ] Auth OK
+  [ ] Dados OK
+  [ ] Notas OK
+  [ ] Tokens OK
+  [ ] Offline OK
+
+================================================================================
+CREDENCIAIS DE TESTE (depois do Supabase)
+================================================================================
+
+Director/Secretaria: sec@kulonga.ao / 123456
+Professor:           prof@kulonga.ao / 123456
+Token Encarregado:   123456
+
+NOTA: Estes são mocks. Depois de criar utilizadores reais
+      no Supabase Auth, actualizar os dados de teste.
+
+================================================================================
+FIM DO PLANO — KULONGA v1.0.0
+© 2025 Custódio Cahilo — Lukashi
+================================================================================

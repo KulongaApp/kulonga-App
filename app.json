@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Kulonga",
+    "slug": "kulonga",
+    "version": "1.0.0",
+    "scheme": "kulonga",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1D5C8A"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1D5C8A"
+      },
+      "package": "ao.lukashi.kulonga"
+    },
+    "ios": {
+      "bundleIdentifier": "ao.lukashi.kulonga"
+    },
+    "extra": {
+      "supabaseUrl": "https://iszrvyjmiwshcybccuwz.supabase.co",
+      "supabaseAnonKey": "sb_publishable_QuDZ7Ve4z6oBEkz_V8aJcQ_i22HdqlW"
+    }
+  }
+}
