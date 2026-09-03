@@ -5,9 +5,10 @@ import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from
   '@react-native-async-storage/async-storage';
 
-// Credenciais do projecto Supabase
-const SUPABASE_URL = 'https://iszrvyjmiwshcybccuwz.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_QuDZ7Ve4z6oBEkz_V8aJcQ_i22HdqlW';
+const SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://iszrvyjmiwshcybccuwz.supabase.co';
+const SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_QuDZ7Ve4z6oBEkz_V8aJcQ_i22HdqlW';
 
 export const supabase = createClient(
   SUPABASE_URL,
