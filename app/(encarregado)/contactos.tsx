@@ -1,66 +1,48 @@
-import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Badge, Card, ProfessorContactCard } from '../../components';
-import { alunoMock } from '../../mocks/aluno';
+import { Card, ProfessorContactCard } from '../../components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { buscarAluno } from '../../services/alunos';
+import { supabase } from '../../services/supabase';
 
 export default function ContactosEncarregado() {
   const router = useRouter();
-  const aluno = alunoMock;
+  const [aluno, setAluno] = useState<any>(null);
+  const [profs, setProfs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const alunoId = await AsyncStorage.getItem('kulonga_aluno_id');
+        if (!alunoId) throw new Error('Sem aluno');
+        const a = await buscarAluno(alunoId);
+        setAluno(a);
+        const { data } = await supabase.from('disciplina_professor').select('professor_id, disciplinas(nome), professores(nome, telefone)').limit(20);
+        setProfs((data as any[]) ?? []);
+      } catch {} finally { setLoading(false); }
+    })();
+  }, []);
+
+  if (loading) return <SafeAreaView style={styles.container}><ActivityIndicator style={{ marginTop: 40 }} color="#1D5C8A" /></SafeAreaView>;
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
-          <TouchableOpacity accessibilityLabel="Voltar" onPress={() => router.push('/(encarregado)/painel')}>
-            <Ionicons name="arrow-back" size={22} color="#1D5C8A" />
-          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(encarregado)/painel')}><Ionicons name="arrow-back" size={22} color="#1D5C8A" /></TouchableOpacity>
           <Text style={styles.title}>Professores e Contactos</Text>
-          <Text style={styles.subtitle}>Turma {aluno.turma} · {aluno.anoLetivo}</Text>
+          <Text style={styles.subtitle}>{aluno?.nome_completo ?? ''}</Text>
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>⭐ Coordenador de Turma</Text>
-          <ProfessorContactCard
-            nome={aluno.coordenador.nome}
-            telefone={aluno.coordenador.telefone}
-            disciplina="Coordenador"
-            coordenador
-            destaque
-          />
-          <Card estilo={styles.infoCard} sombra>
-            <Text style={styles.infoText}>
-              O coordenador é o teu primeiro contacto para assuntos gerais da turma.
-            </Text>
-          </Card>
-        </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>👥 Professores por disciplina</Text>
-          {aluno.disciplinas.map((disciplina) => (
-            <ProfessorContactCard
-              key={disciplina.id}
-              nome={disciplina.professor.nome}
-              telefone={disciplina.professor.telefone}
-              disciplina={disciplina.nome}
-              coordenador={false}
-            />
+          {profs.length === 0 ? <Text style={{ color: '#6B7280' }}>Nenhum contacto disponível ainda.</Text> : profs.map((p: any, i: number) => (
+            <ProfessorContactCard key={i} nome={p.professores?.nome ?? 'Professor'} telefone={p.professores?.telefone ?? ''} disciplina={p.disciplinas?.nome ?? '—'} coordenador={false} />
           ))}
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ℹ️ Informação útil</Text>
-          <View style={styles.usefulCard}>
-            <Text style={styles.usefulText}>
-              Podes ligar directamente carregando no botão de telefone. Os horários de contacto são definidos por cada escola.
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.footerText}>
-          Os contactos reais aparecem quando a escola activar o Kulonga.
-        </Text>
+        <Card estilo={styles.infoCard} sombra><Text style={styles.infoText}>Liga directamente carregando no botão de telefone.</Text></Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -76,7 +58,4 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: '800', marginBottom: 12, color: '#111827' },
   infoCard: { marginTop: 12, backgroundColor: '#EFF6FF' },
   infoText: { color: '#1E3A8A', lineHeight: 20 },
-  usefulCard: { backgroundColor: '#EFF6FF', padding: 16, borderRadius: 12 },
-  usefulText: { color: '#1E3A8A', lineHeight: 20 },
-  footerText: { color: '#6B7280', fontSize: 12, lineHeight: 18, textAlign: 'center' },
 });

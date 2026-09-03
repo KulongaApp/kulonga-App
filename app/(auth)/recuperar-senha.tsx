@@ -35,11 +35,14 @@ export default function RecuperarSenha() {
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setLoading(false);
-
-    // TODO: usar supabase.auth.resetPasswordForEmail(data.email)
-    setEnviado(true);
+    try {
+      const { supabase } = await import('../../services/supabase');
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, { redirectTo: 'kulonga://recuperar-senha' });
+      if (error) throw error;
+      setEnviado(true);
+    } catch (e: any) {
+      Alert.alert('Erro', e?.message ?? 'Não foi possível enviar o email.');
+    } finally { setLoading(false); }
   };
 
   if (enviado) {
