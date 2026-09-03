@@ -22,6 +22,7 @@ type FormData = z.infer<typeof schema>;
 export default function CadastroAluno() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
   const [escolas, setEscolas] = useState<{id:string;nome:string}[]>([]);
   const [escolaId, setEscolaId] = useState('');
   const [visivel, setVisivel] = useState(false);
@@ -30,9 +31,11 @@ export default function CadastroAluno() {
   useEffect(() => { listarEscolas().then(d=>setEscolas(d??[])).catch(()=>{}); }, []);
   const onSubmit = async (data: FormData) => {
     if (!escolaId) { Alert.alert('Escolhe a escola'); return; }
-    setLoading(true);
+    setLoading(true); setErro('');
     const { data: authData, error } = await supabase.auth.signUp({ email: data.email, password: data.senha, options: { data: { papeis: ['aluno'], nome: data.nome } } });
-    if (error || !authData.user) { setLoading(false); Alert.alert('Erro', error?.message ?? 'Falha'); return; }
+    if (error) { setLoading(false); const m = error.message.includes('already') ? 'Email já existe. Faz login.' : error.message; setErro(m); Alert.alert('Erro', m); return; }
+    if (!authData.user) { setLoading(false); const m='Falha ao criar conta. Desliga Confirm email no Supabase.'; setErro(m); Alert.alert('Erro', m); return; }
+    if (!authData.session) { setLoading(false); const m='Conta criada mas confirma email está ligado. Desliga em Supabase Auth.'; setErro(m); Alert.alert('Confirma email', m); return; }
     try {
       const { error: rpcErr } = await supabase.rpc('registar_aluno', { p_escola_id: escolaId, p_nome: data.nome, p_email: data.email, p_genero: data.genero });
       if (rpcErr) throw rpcErr;
@@ -42,8 +45,8 @@ export default function CadastroAluno() {
       await AsyncStorage.setItem('kulonga_sessao_activa','true');
       await AsyncStorage.setItem('kulonga_onboarding_feito','true');
       setLoading(false);
-      Alert.alert('Aluno registado!', 'A entrar na tua área...', [{ text: 'OK', onPress: () => router.replace('/(aluno)' as any) }]);
-    } catch (e:any) { setLoading(false); Alert.alert('Erro', e.message); }
+      router.replace('/(aluno)' as any);
+    } catch (e:any) { setLoading(false); const m=e.message; setErro(m); Alert.alert('Erro', m); }
   };
   return (
     <SafeAreaView style={s.safe}>
@@ -62,6 +65,7 @@ export default function CadastroAluno() {
             </View>
             <Controller control={control} name="senha" render={({field, fieldState})=> <Input label="Senha" placeholder="Mínimo 6" valor={field.value} onMudar={field.onChange} seguro icone="lock-closed-outline" erro={fieldState.error?.message} />} />
             <Controller control={control} name="confirmarSenha" render={({field, fieldState})=> <Input label="Confirmar" placeholder="Repete senha" valor={field.value} onMudar={field.onChange} seguro icone="lock-closed-outline" erro={fieldState.error?.message} />} />
+            {erro ? <Text style={{ color: '#DC2626', textAlign: 'center', marginBottom: 12 }}>{erro}</Text> : null}
             <Button titulo="Registar" onPress={handleSubmit(onSubmit) as any} variante="primario" tamanho="grande" carregando={loading} />
           </View>
         </ScrollView>

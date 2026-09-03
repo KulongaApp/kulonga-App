@@ -47,6 +47,7 @@ type FormData = z.infer<typeof schema>;
 export default function CadastroEscola() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState('');
   const [provinciaVisivel, setProvinciaVisivel] = useState(false);
 
   const { control, handleSubmit, watch, setValue } = useForm<FormData>({
@@ -69,25 +70,26 @@ export default function CadastroEscola() {
   const provinciaSeleccionada = watch('provincia');
 
   const onSubmit = async (data: FormData) => {
-    setLoading(true);
-
-    // 1. Criar conta do director (secretaria) no Supabase Auth
+    setLoading(true); setErro('');
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.emailDirector,
       password: data.senha,
-      options: {
-        data: { papeis: ['secretaria'], nome: data.nomeDirector },
-      },
+      options: { data: { papeis: ['secretaria'], nome: data.nomeDirector } },
     });
     if (authError) {
       setLoading(false);
-      Alert.alert('Erro', authError.message);
-      return;
+      const msg = authError.message.includes('already') ? 'Este email já existe. Faz login.' : authError.message;
+      setErro(msg); Alert.alert('Erro', msg); return;
     }
     if (!authData.user) {
       setLoading(false);
-      Alert.alert('Erro', 'Não foi possível criar a conta do director.');
-      return;
+      const msg = 'Não foi possível criar a conta. Verifica se Confirm email está desligado no Supabase.';
+      setErro(msg); Alert.alert('Erro', msg); return;
+    }
+    if (!authData.session) {
+      setLoading(false);
+      const msg = 'Conta criada mas precisa confirmar email. Desliga Confirm email no Supabase Auth.';
+      setErro(msg); Alert.alert('Confirma email', msg); return;
     }
 
     // 2. Registar escola + director (professor) via RPC
@@ -110,10 +112,11 @@ export default function CadastroEscola() {
       await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
       await AsyncStorage.setItem('kulonga_onboarding_feito', 'true');
       setLoading(false);
-      Alert.alert('Escola registada!', `${data.nomeEscola} foi registada. A entrar...`, [{ text: 'OK', onPress: () => router.replace('/(secretaria)' as any) }]);
+      router.replace('/(secretaria)' as any);
     } catch (e: any) {
       setLoading(false);
-      Alert.alert('Erro', e?.message ?? 'Falhou ao registar a escola.');
+      const msg = e?.message ?? 'Falhou ao registar a escola.';
+      setErro(msg); Alert.alert('Erro', msg);
     }
   };
 
@@ -363,6 +366,7 @@ export default function CadastroEscola() {
               )}
             />
 
+            {erro ? <Text style={{ color: '#DC2626', textAlign: 'center', marginBottom: 12 }}>{erro}</Text> : null}
             <Button
               titulo="Registar Escola"
               onPress={handleSubmit(onSubmit) as any}
