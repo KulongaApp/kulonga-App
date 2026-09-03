@@ -11,16 +11,22 @@ export default function EscolherPerfil() {
       <Text style={styles.title}>Como queres entrar?</Text>
       <Text style={styles.subtitle}>Já tens conta? Entra. Se não, cria uma.</Text>
 
-      <TouchableOpacity accessibilityLabel="Sou Encarregado" style={styles.card} onPress={() => router.push('/(auth)/token-encarregado')}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/token-encarregado')}>
         <Text style={styles.icon}>👨‍👩‍👧</Text>
         <Text style={styles.cardTitle}>Sou Encarregado — Já tenho código</Text>
         <Text style={styles.cardDesc}>Tenho o código de 6 dígitos da escola</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity accessibilityLabel="Sou Professor" style={styles.card} onPress={() => router.push('/(auth)/login-professor')}>
+      <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/login-professor')}>
         <Text style={styles.icon}>👨‍🏫</Text>
         <Text style={styles.cardTitle}>Sou Professor / Secretaria — Já tenho conta</Text>
         <Text style={styles.cardDesc}>Tenho email e senha da escola</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/login-aluno')}>
+        <Text style={styles.icon}>🎓</Text>
+        <Text style={styles.cardTitle}>Sou Aluno — Já tenho conta</Text>
+        <Text style={styles.cardDesc}>Entra com email e senha de aluno</Text>
       </TouchableOpacity>
 
       <View style={styles.divider} />
@@ -34,6 +40,11 @@ export default function EscolherPerfil() {
       <TouchableOpacity onPress={() => router.push('/(auth)/cadastro-professor' as any)} style={styles.cardCreate}>
         <Text style={styles.cardCreateTitle}>👨‍🏫 Criar conta de professor</Text>
         <Text style={styles.cardCreateDesc}>Registar como professor</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push('/(auth)/cadastro-aluno' as any)} style={styles.cardCreate}>
+        <Text style={styles.cardCreateTitle}>🎓 Criar conta de aluno</Text>
+        <Text style={styles.cardCreateDesc}>Registar como aluno</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

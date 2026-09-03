@@ -32,6 +32,7 @@ export default function Splash() {
             if (sess.papel === 'encarregado') router.replace('/(encarregado)' as any);
             else if (sess.papel === 'professor') router.replace('/(professor)' as any);
             else if (sess.papel === 'secretaria') router.replace('/(secretaria)' as any);
+            else if (sess.papel === 'aluno') router.replace('/(aluno)' as any);
             else router.replace('/(auth)/escolher-perfil' as any);
             return;
           }
