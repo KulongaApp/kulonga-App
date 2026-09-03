@@ -17,48 +17,30 @@ export default function Splash() {
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
+      Animated.timing(opacity, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 800, useNativeDriver: true }),
     ]).start();
-
     const timer = setTimeout(() => {
       (async () => {
-        const feito = await AsyncStorage.getItem('kulonga_onboarding_feito');
-        const perfil = await AsyncStorage.getItem('kulonga_perfil');
-        const sessaoActiva = await AsyncStorage.getItem('kulonga_sessao_activa');
-        const papelActivo = await AsyncStorage.getItem('kulonga_papel_activo');
-
-        // Se tem sessão activa, vai directo ao painel
-        // sem passar pelo login ou onboarding
-        if (sessaoActiva === 'true' && papelActivo) {
-          if (papelActivo === 'encarregado') {
-            router.replace('/(encarregado)' as any);
-          } else if (papelActivo === 'professor') {
-            router.replace('/(professor)' as any);
-          } else if (papelActivo === 'secretaria') {
-            router.replace('/(secretaria)' as any);
+        try {
+          const { supabase } = await import('../services/supabase');
+          const { verificarSessao } = await import('../services/auth');
+          const sess = await verificarSessao();
+          if (sess.activa && sess.papel) {
+            await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
+            await AsyncStorage.setItem('kulonga_papel_activo', sess.papel);
+            if (sess.papel === 'encarregado') router.replace('/(encarregado)' as any);
+            else if (sess.papel === 'professor') router.replace('/(professor)' as any);
+            else if (sess.papel === 'secretaria') router.replace('/(secretaria)' as any);
+            else router.replace('/(auth)/escolher-perfil' as any);
+            return;
           }
-          return;
-        }
-
-        if (feito === 'true') {
-          router.replace('/(auth)/escolher-perfil' as any);
-          return;
-        }
-
-        // Primeira vez — vai para o onboarding
+        } catch {}
+        const feito = await AsyncStorage.getItem('kulonga_onboarding_feito');
+        if (feito === 'true') { router.replace('/(auth)/escolher-perfil' as any); return; }
         router.replace('/(onboarding)/provincia' as any);
       })();
     }, 2500);
-
     return () => clearTimeout(timer);
   }, [opacity, translateY, router]);
 

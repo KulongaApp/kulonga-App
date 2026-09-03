@@ -50,19 +50,15 @@ export async function validarTokenEncarregado(
   codigo: string
 ): Promise<ResultadoToken> {
   try {
-    const { data, error } = await supabase
-      .from('tokens_acesso')
-      .select('aluno_id, ativo, expira_em')
-      .eq('codigo', codigo)
-      .eq('ativo', true)
-      .single();
-    if (error || !data) return { valido: false, erro: 'Token inválido' };
-    if (data.expira_em && new Date(data.expira_em) < new Date()) {
-      return { valido: false, erro: 'Token expirado' };
-    }
-    return { valido: true, alunoId: data.aluno_id };
+    const { data, error } = await supabase.rpc('validar_e_vincular_token', { p_codigo: codigo });
+    if (error) return { valido: false, erro: 'Token inválido' };
+    const alunoId = data as unknown as string;
+    if (!alunoId) return { valido: false, erro: 'Token inválido' };
+    return { valido: true, alunoId };
   } catch (e: any) {
-    return { valido: false, erro: e.message };
+    const msg = e?.message ?? '';
+    if (msg.includes('expirado')) return { valido: false, erro: 'Token expirado' };
+    return { valido: false, erro: 'Token inválido' };
   }
 }
 
