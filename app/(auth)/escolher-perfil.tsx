@@ -19,14 +19,20 @@ export default function EscolherPerfil() {
 
       <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/login-professor')}>
         <Text style={styles.icon}>👨‍🏫</Text>
-        <Text style={styles.cardTitle}>Sou Professor / Secretaria — Já tenho conta</Text>
-        <Text style={styles.cardDesc}>Tenho email e senha da escola</Text>
+        <Text style={styles.cardTitle}>Sou Professor — Já tenho conta</Text>
+        <Text style={styles.cardDesc}>Email e senha de professor</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/login-secretaria')}>
+        <Text style={styles.icon}>🏫</Text>
+        <Text style={styles.cardTitle}>Sou Secretaria / Direcção — Já tenho conta</Text>
+        <Text style={styles.cardDesc}>Email e senha da direcção</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/login-aluno')}>
         <Text style={styles.icon}>🎓</Text>
         <Text style={styles.cardTitle}>Sou Aluno — Já tenho conta</Text>
-        <Text style={styles.cardDesc}>Entra com email e senha de aluno</Text>
+        <Text style={styles.cardDesc}>Email e senha de aluno</Text>
       </TouchableOpacity>
 
       <View style={styles.divider} />

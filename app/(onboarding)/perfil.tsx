@@ -3,11 +3,11 @@ import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Animated } from
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Escolhe perfil: encarregado, professor, secretaria
 const PERFIS = [
   { chave: 'encarregado', icone: '👨‍👩‍👧', titulo: 'Encarregado de Educação', desc: 'Acompanha as notas e fala com os professores do teu filho', cor: '#C8511B' },
   { chave: 'professor', icone: '👨‍🏫', titulo: 'Professor', desc: 'Lança notas, gere as tuas turmas e comunica com as famílias', cor: '#1D5C8A' },
   { chave: 'secretaria', icone: '🏫', titulo: 'Secretaria / Direcção', desc: 'Gere a escola, os alunos e gera os códigos de acesso', cor: '#16A34A' },
+  { chave: 'aluno', icone: '🎓', titulo: 'Aluno', desc: 'Vê as tuas notas, boletim e perfil', cor: '#7C3AED' },
 ];
 
 export default function Perfil() {
