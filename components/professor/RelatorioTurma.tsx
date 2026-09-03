@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import {
-  turmaMock, calcularMedia, classificacao, AlunoNota,
+  turmaMock, calcularMAC, calcularMF, classificacao,
 } from '../../mocks/turma-notas';
 
 interface Props {
@@ -19,20 +19,12 @@ interface Props {
 
 export default function RelatorioTurma({ trimestre, notas, onFechar }: Props) {
 
-  // Calcula média de cada aluno com os dados actuais
   const alunosComMedia = turmaMock.alunos.map(a => {
-    const n = notas[a.id] || { frequencia: '', prova: '', exame: '' };
+    const n = notas[a.id] || { frequencia: '', prova: '' };
     const f = parseFloat(n.frequencia);
     const p = parseFloat(n.prova);
-    const e = parseFloat(n.exame);
-    return {
-      ...a,
-      mediaFinal: calcularMedia(
-        isNaN(f) ? null : f,
-        isNaN(p) ? null : p,
-        isNaN(e) ? null : e,
-      ),
-    };
+    const mf = calcularMF(isNaN(f) ? null : f, isNaN(p) ? null : p);
+    return { ...a, mediaFinal: mf };
   });
 
   const avaliados = alunosComMedia.filter(a => a.mediaFinal !== null);

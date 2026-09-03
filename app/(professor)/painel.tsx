@@ -168,13 +168,13 @@ export default function PainelProfessor() {
         escolaId ? buscarEscola(escolaId).catch(() => null) : Promise.resolve(null),
         escolaId ? listarTurmas(escolaId).catch(() => []) : Promise.resolve([]),
       ]);
-      const turmasMapeadas: Turma[] = (turmas as any[]).map((t) => ({
-        id: t.id,
-        nome: t.nome,
-        disciplina: (profRow?.data?.disciplinas ?? [])[0] ?? '',
-        totalAlunos: 0,
-        notasLancadas: 0,
-        periodo: (t.turno as any) ?? 'Manhã',
+      const turmasMapeadas: Turma[] = await Promise.all((turmas as any[]).map(async (t) => {
+        let total = 0;
+        try {
+          const alunos = await supabase.from('turma_alunos').select('aluno_id', { count: 'exact' }).eq('turma_id', t.id);
+          total = alunos.count ?? (alunos.data?.length ?? 0);
+        } catch {}
+        return { id: t.id, nome: t.nome, disciplina: (profRow?.data?.disciplinas ?? [])[0] ?? '', totalAlunos: total, notasLancadas: 0, periodo: (t.turno as any) ?? 'Manhã' };
       }));
       setProf({
         nome: profRow?.data?.nome ?? 'Professor',

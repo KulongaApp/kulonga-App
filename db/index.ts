@@ -13,7 +13,6 @@ const adapter = new LokiJSAdapter({
 export const database = new Database({
   adapter,
   modelClasses: [NotaPendente as any],
-  actionsEnabled: true,
 });
 
 export async function getPendentes() {
