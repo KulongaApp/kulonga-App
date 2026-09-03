@@ -33,25 +33,10 @@ export default function AdicionarProfessor() {
     const senha = gerarSenha();
     try {
       const escolaId = await obterEscolaDoUsuario();
-      if (!escolaId) {
-        Alert.alert('Erro', 'Não foi possível identificar a escola.');
-        return;
-      }
-      await adicionarProfessor({
-        escolaId,
-        nome: data.nomeCompleto,
-        email: data.email,
-        telefone: data.telefone,
-        disciplinas: data.disciplina ? [data.disciplina] : [],
-      });
-      Alert.alert(
-        'Professor pré-registado com sucesso!',
-        `O professor ${data.nomeCompleto} foi adicionado à escola.\n\nPara aceder, o professor deve registar-se em "Registar Professor" com o email ${data.email}.`,
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
-    } catch (e: any) {
-      Alert.alert('Erro', e?.message ?? 'Não foi possível adicionar o professor.');
-    }
+      if (!escolaId) { Alert.alert('Erro', 'Escola não encontrada.'); return; }
+      await adicionarProfessor({ escolaId, nome: data.nomeCompleto, email: data.email, telefone: data.telefone, disciplinas: data.disciplina ? [data.disciplina] : [] });
+      Alert.alert('Professor adicionado!', `✅ ${data.nomeCompleto} foi ligado à escola.\n\nCredenciais para o professor:\nEmail: ${data.email}\nSenha temporária: ${senha}\n\n→ Entrega ao professor. Ele vai em "Criar conta → Professor — Ativar conta" e cria a senha com este email. Depois faz Login e já vê as turmas.`, [{ text: 'OK', onPress: () => router.back() }]);
+    } catch (e: any) { Alert.alert('Erro', e?.message ?? 'Falha'); }
   }
 
   return (

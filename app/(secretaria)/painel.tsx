@@ -194,11 +194,29 @@ export default function SecretariaPainel() {
                     accessibilityLabel="Pesquisar turma"
                   />
                 </View>
+                <TouchableOpacity style={[styles.acoesBtn, styles.acoesBtnVerde, { marginBottom: 12 }]} onPress={() => {
+                  Alert.prompt('Criar Turma', 'Nome da turma (ex: 10ªA)', [
+                    { text: 'Cancelar', style: 'cancel' },
+                    { text: 'Criar', onPress: async (nome?: string) => {
+                      if (!nome) return;
+                      try {
+                        const escolaId = await obterEscolaDoUsuario();
+                        const { supabase } = await import('../../services/supabase');
+                        const { error } = await supabase.from('turmas').insert({ escola_id: escolaId, nome, ano_lectivo: '2025/2026', turno: 'Manhã' });
+                        if (error) throw error;
+                        Alert.alert('Criada', `Turma ${nome} criada!`); carregarTudo();
+                      } catch (e: any) { Alert.alert('Erro', e.message); }
+                    }}
+                  ]);
+                }}>
+                  <Ionicons name="add-circle-outline" size={18} color="#fff" />
+                  <Text style={styles.acoesTxt}>Criar Turma</Text>
+                </TouchableOpacity>
                 {turmasFiltradas.map((t) => (
                   <TouchableOpacity
                     key={t.id}
                     style={styles.itemCard}
-                    onPress={() => Alert.alert('Turma', `${t.nome}\nAno: ${t.ano_lectivo ?? '—'}\nTurno: ${t.turno ?? '—'}`)}
+                    onPress={() => router.push(`/(secretaria)/turma-${t.id}` as any)}
                   >
                     <View style={styles.avatarSmall}>
                       <Text style={styles.avatarSmallTxt}>{t.nome}</Text>
@@ -209,7 +227,7 @@ export default function SecretariaPainel() {
                     </View>
                   </TouchableOpacity>
                 ))}
-                {turmasFiltradas.length === 0 && <Text style={styles.vazio}>Nenhuma turma.</Text>}
+                {turmasFiltradas.length === 0 && <Text style={styles.vazio}>Nenhuma turma. Cria a primeira.</Text>}
               </View>
             )}
 
