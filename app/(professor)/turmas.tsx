@@ -1,35 +1,41 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-
-const turmasMock = [
-  { id: 't1', nome: '10ªA', disciplina: 'Matemática' },
-  { id: 't2', nome: '11ªB', disciplina: 'Física' },
-  { id: 't3', nome: '12ªC', disciplina: 'Química' },
-];
+import { obterEscolaDoUsuario } from '../../services/professores';
+import { listarTurmas } from '../../services/turmas';
 
 export default function Turmas() {
   const router = useRouter();
+  const [turmas, setTurmas] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const escolaId = await obterEscolaDoUsuario();
+        if (!escolaId) throw new Error('Escola não encontrada');
+        const data = await listarTurmas(escolaId);
+        setTurmas(data as any[]);
+      } catch (e: any) { setErro(e?.message ?? 'Erro ao carregar turmas'); }
+      finally { setLoading(false); }
+    })();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Turmas</Text>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scroll}>
-        {turmasMock.map((t) => (
-          <TouchableOpacity key={t.id} style={styles.card} onPress={() => router.push('/(professor)/lancar-notas' as any)}>
-            <View>
-              <Text style={styles.cardTitle}>{t.nome}</Text>
-              <Text style={styles.cardSub}>{t.disciplina}</Text>
-            </View>
-            <Text style={styles.toca}>Toca para lançar notas →</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.header}><Text style={styles.title}>Turmas</Text></View>
+      {loading ? <ActivityIndicator style={{ marginTop: 40 }} color="#C8511B" /> : erro ? <Text style={{ color: '#DC2626', textAlign: 'center', marginTop: 24 }}>{erro}</Text> : turmas.length === 0 ? <Text style={{ textAlign: 'center', marginTop: 24, color: '#6B7280' }}>Nenhuma turma encontrada</Text> : (
+        <ScrollView contentContainerStyle={styles.scroll}>
+          {turmas.map((t: any) => (
+            <TouchableOpacity key={t.id} style={styles.card} onPress={() => router.push('/(professor)/lancar-notas' as any)}>
+              <View><Text style={styles.cardTitle}>{t.nome}</Text><Text style={styles.cardSub}>{t.serie ?? ''} · {t.ano_lectivo}</Text></View>
+              <Text style={styles.toca}>Toca para lançar notas →</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
