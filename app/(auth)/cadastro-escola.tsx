@@ -105,19 +105,12 @@ export default function CadastroEscola() {
 
       await AsyncStorage.setItem('kulonga_escola_id', escolaId);
       await AsyncStorage.setItem('kulonga_perfil', 'secretaria');
+      await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(['secretaria']));
+      await AsyncStorage.setItem('kulonga_papel_activo', 'secretaria');
+      await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
       await AsyncStorage.setItem('kulonga_onboarding_feito', 'true');
       setLoading(false);
-
-      Alert.alert(
-        'Escola registada!',
-        `${data.nomeEscola} foi registada com sucesso.\n\nAgora podes fazer login com os dados do director.`,
-        [
-          {
-            text: 'Ir para o login',
-            onPress: () => router.replace('/(auth)/login-secretaria' as any),
-          },
-        ]
-      );
+      Alert.alert('Escola registada!', `${data.nomeEscola} foi registada. A entrar...`, [{ text: 'OK', onPress: () => router.replace('/(secretaria)' as any) }]);
     } catch (e: any) {
       setLoading(false);
       Alert.alert('Erro', e?.message ?? 'Falhou ao registar a escola.');

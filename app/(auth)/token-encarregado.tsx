@@ -72,8 +72,12 @@ export default function TokenEncarregado() {
     setLoading(false);
 
     if (res.valido && res.alunoId) {
+      const ex = await AsyncStorage.getItem('kulonga_papeis');
+      const lista: string[] = ex ? JSON.parse(ex) : [];
+      if (!lista.includes('encarregado')) lista.push('encarregado');
+      await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(lista));
       await AsyncStorage.setItem('kulonga_papel_activo', 'encarregado');
-      await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(['encarregado']));
+      await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
       await AsyncStorage.setItem('kulonga_aluno_id', res.alunoId);
       router.replace('/(encarregado)' as any);
       return;

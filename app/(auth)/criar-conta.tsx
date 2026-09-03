@@ -17,9 +17,9 @@ export default function CriarConta() {
           <Text style={s.icon}>🏫</Text><View style={{ flex: 1, marginLeft: 12 }}><Text style={s.cardTitle}>Escola / Direcção</Text><Text style={s.cardDesc}>Registar nova escola — cria o director</Text></View><Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={s.card} onPress={() => router.push('/(auth)/cadastro-professor' as any)}>
-          <Text style={s.icon}>👨‍🏫</Text><View style={{ flex: 1, marginLeft: 12 }}><Text style={s.cardTitle}>Professor</Text><Text style={s.cardDesc}>Ligação à escola existente</Text></View><Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-        </TouchableOpacity>
+        <View style={[s.card, { opacity: 0.6 }]}>
+          <Text style={s.icon}>👨‍🏫</Text><View style={{ flex: 1, marginLeft: 12 }}><Text style={s.cardTitle}>Professor</Text><Text style={s.cardDesc}>Criado pela direcção — faz login com dados da escola</Text></View><Ionicons name="lock-closed" size={18} color="#9CA3AF" />
+        </View>
 
         <TouchableOpacity style={s.card} onPress={() => router.push('/(auth)/cadastro-aluno' as any)}>
           <Text style={s.icon}>🎓</Text><View style={{ flex: 1, marginLeft: 12 }}><Text style={s.cardTitle}>Aluno</Text><Text style={s.cardDesc}>Ligação à escola existente</Text></View><Ionicons name="chevron-forward" size={18} color="#9CA3AF" />

@@ -36,9 +36,13 @@ export default function CadastroAluno() {
     try {
       const { error: rpcErr } = await supabase.rpc('registar_aluno', { p_escola_id: escolaId, p_nome: data.nome, p_email: data.email, p_genero: data.genero });
       if (rpcErr) throw rpcErr;
-      await AsyncStorage.setItem('kulonga_perfil','aluno'); await AsyncStorage.setItem('kulonga_onboarding_feito','true');
+      await AsyncStorage.setItem('kulonga_perfil','aluno');
+      await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(['aluno']));
+      await AsyncStorage.setItem('kulonga_papel_activo','aluno');
+      await AsyncStorage.setItem('kulonga_sessao_activa','true');
+      await AsyncStorage.setItem('kulonga_onboarding_feito','true');
       setLoading(false);
-      Alert.alert('Aluno registado!', 'Agora faz login.', [{ text: 'Login', onPress: () => router.replace('/(auth)/login-aluno' as any) }]);
+      Alert.alert('Aluno registado!', 'A entrar na tua área...', [{ text: 'OK', onPress: () => router.replace('/(aluno)' as any) }]);
     } catch (e:any) { setLoading(false); Alert.alert('Erro', e.message); }
   };
   return (

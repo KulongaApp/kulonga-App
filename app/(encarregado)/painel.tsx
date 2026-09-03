@@ -91,17 +91,8 @@ export default function PainelEncarregado() {
   }
 
   async function sair() {
-    Alert.alert('Sair', 'Tens a certeza que queres sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.replace('/(onboarding)/provincia' as any);
-        },
-      },
-    ]);
+    await logout();
+    router.replace('/(auth)/escolher-perfil' as any);
   }
 
   return (

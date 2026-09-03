@@ -60,8 +60,8 @@ export default function Splash() {
         </View>
 
         <View style={styles.rodape}>
-          <Text style={styles.by}>by Lukashi</Text>
-          <Text style={styles.copyright}>© 2025 Custódio Cahilo</Text>
+          <Text style={styles.by}>Kulonga</Text>
+          <Text style={styles.copyright}>© 2025 Kulonga — Educação</Text>
         </View>
       </Animated.View>
     </SafeAreaView>

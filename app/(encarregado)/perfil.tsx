@@ -21,10 +21,8 @@ export default function PerfilEncarregado() {
     })();
   }, []);
   async function sair() {
-    Alert.alert('Sair', 'Tens a certeza?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Sair', style: 'destructive', onPress: async () => { await logout(); router.replace('/(auth)/escolher-perfil' as any); } },
-    ]);
+    await logout();
+    router.replace('/(auth)/escolher-perfil' as any);
   }
   if (loading) return <SafeAreaView style={styles.container}><ActivityIndicator style={{ marginTop: 40 }} /></SafeAreaView>;
   return (

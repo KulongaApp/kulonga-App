@@ -209,18 +209,9 @@ export default function PainelProfessor() {
     );
   }
 
-  function handleLogout() {
-    Alert.alert('Sair', 'Tens a certeza que queres sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.replace('/(onboarding)/provincia' as any);
-        },
-      },
-    ]);
+  async function handleLogout() {
+    await logout();
+    router.replace('/(auth)/escolher-perfil' as any);
   }
 
   const totalAlunos = getTotalAlunos(prof.turmas);
