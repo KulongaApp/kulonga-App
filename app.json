@@ -4,6 +4,12 @@
     "slug": "kulonga",
     "version": "1.0.0",
     "scheme": "kulonga",
+    "platforms": ["ios", "android", "web"],
+    "plugins": ["expo-router"],
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    },
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/icon.png",
