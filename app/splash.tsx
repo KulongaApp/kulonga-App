@@ -49,17 +49,8 @@ export default function Splash() {
           return;
         }
 
-        // Se fez onboarding mas não tem sessão activa
         if (feito === 'true') {
-          if (perfil === 'encarregado') {
-            router.replace('/(auth)/token-encarregado' as any);
-          } else if (perfil === 'professor') {
-            router.replace('/(auth)/login-professor' as any);
-          } else if (perfil === 'secretaria') {
-            router.replace('/(auth)/login-secretaria' as any);
-          } else {
-            router.replace('/(onboarding)/provincia' as any);
-          }
+          router.replace('/(auth)/escolher-perfil' as any);
           return;
         }
 

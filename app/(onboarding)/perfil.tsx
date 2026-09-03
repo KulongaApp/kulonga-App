@@ -23,14 +23,7 @@ export default function Perfil() {
     // Debug: ver qual perfil foi seleccionado
     console.log('Perfil seleccionado:', selected);
 
-    // Redireciona conforme o perfil (ids exactos: encarregado|professor|secretaria)
-    if (selected === 'encarregado') {
-      router.replace('/(auth)/token-encarregado' as any);
-    } else if (selected === 'professor') {
-      router.replace('/(auth)/login-professor' as any);
-    } else if (selected === 'secretaria') {
-      router.replace('/(auth)/login-secretaria' as any);
-    }
+    router.replace('/(auth)/escolher-perfil' as any);
   };
 
   return (
