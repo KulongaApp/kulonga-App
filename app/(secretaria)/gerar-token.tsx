@@ -72,6 +72,7 @@ export default function GerarTokenSecretaria() {
   async function copiarCodigo() {
     if (!tokenGerado) return;
     try {
+      // @ts-ignore
       const clipboard = (await import('expo-clipboard')) as any;
       await clipboard.setStringAsync(tokenGerado);
       Alert.alert('Copiado', 'Código copiado para a área de transferência');
@@ -131,7 +132,7 @@ export default function GerarTokenSecretaria() {
             <View style={styles.modalConteudo}>
               <Ionicons name="checkmark-circle" size={64} color="#16A34A" />
               <Text style={styles.modalTitulo}>Token gerado com sucesso!</Text>
-              <Text style={styles.modalAluno}>{alunoSelecionado?.nome}</Text>
+              <Text style={styles.modalAluno}>{alunoSelecionado?.nome_completo}</Text>
               <Text style={styles.modalCodigo}>{formatToken(tokenGerado)}</Text>
               <Text style={styles.modalInstrucoes}>Entrega este código ao encarregado de educação pessoalmente ou imprime.</Text>
               <TouchableOpacity style={styles.modalBotao} onPress={copiarCodigo}>

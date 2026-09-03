@@ -92,7 +92,7 @@ export default function AdicionarProfessor() {
 
           {coordenador && (
             <Controller control={control} name="turmaCoord" render={({ field, fieldState }) => (
-              <Input label="Turma que coordena" placeholder="10ªA" valor={field.value} onMudar={field.onChange} icone="ribbon-outline" erro={fieldState.error?.message} />
+              <Input label="Turma que coordena" placeholder="10ªA" valor={field.value ?? ''} onMudar={field.onChange} icone="ribbon-outline" erro={fieldState.error?.message} />
             )} />
           )}
 

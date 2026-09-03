@@ -121,7 +121,7 @@ export default function TokenEncarregado() {
                 return (
                   <TextInput
                     key={i}
-                    ref={(el) => (refs.current[i] = el)}
+                    ref={(el) => { refs.current[i] = el; }}
                     value={d}
                     onChangeText={(t) => handleDigito(t, i)}
                     onKeyPress={(e) => handleApagar(e, i)}
