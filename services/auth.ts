@@ -100,5 +100,9 @@ export async function logout(): Promise<void> {
     'kulonga_papeis',
     'kulonga_nome',
     'kulonga_filhos',
+    'kulonga_aluno_id',
+    'kulonga_escola_id',
+    'kulonga_provincia',
+    'kulonga_lingua',
   ]);
 }

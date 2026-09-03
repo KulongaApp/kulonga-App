@@ -18,7 +18,6 @@ export async function gerarBoletimTurma(turmaId: string) {
   return data;
 }
 
-// Média de uma disciplina num trimestre (peso: prova 0.4, frequencia 0.3, exame 0.3)
 export async function calcularMedia(
   alunoId: string,
   disciplinaId: string,
@@ -31,18 +30,15 @@ export async function calcularMedia(
     .eq('disciplina_id', disciplinaId)
     .eq('trimestre', trimestre);
   if (error) throw error;
-
-  const pesos: Record<string, number> = {
-    frequencia: 0.3,
-    prova: 0.4,
-    exame: 0.3,
+  const get = (t: string) => {
+    const r = (data ?? []).find((x: any) => x.tipo === t);
+    return r ? Number(r.valor) : null;
   };
-  let soma = 0;
-  let totalPeso = 0;
-  for (const n of data ?? []) {
-    const p = pesos[n.tipo] ?? 0;
-    soma += Number(n.valor) * p;
-    totalPeso += p;
-  }
-  return totalPeso > 0 ? soma / totalPeso : 0;
+  const mac = get('frequencia');
+  const pt = get('prova');
+  if (mac !== null && pt !== null) return (mac + pt) / 2;
+  if (mac !== null) return mac;
+  if (pt !== null) return pt;
+  const exame = get('exame');
+  return exame ?? 0;
 }

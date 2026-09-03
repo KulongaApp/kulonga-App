@@ -190,8 +190,8 @@ export default function LancarNotas() {
         const mac = macAluno(a.id);
         const pt = notas[a.id]?.pt;
         const ptNum = pt !== '' ? parseFloat(pt) : null;
-        if (mac !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'MAC', valor: mac, autor_id: user.id, autor_papel: 'professor' });
-        if (ptNum !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'PT', valor: ptNum, autor_id: user.id, autor_papel: 'professor' });
+        if (mac !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'frequencia', valor: mac, autor_id: user.id, autor_papel: 'professor' });
+        if (ptNum !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'prova', valor: ptNum, autor_id: user.id, autor_papel: 'professor' });
       }
       const { error } = await supabase.from('notas').insert(linhas);
       if (error) throw error;
