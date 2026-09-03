@@ -1,25 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-
-// Mock de notas pendentes — substituir por WatermelonDB
-const notasPendentes = [
-  { id: 'n1', aluno: 'João Manuel Sebastião', disciplina: 'Matemática', turma: '10ªA', trimestre: 1, valor: 15, lancadoEm: '2025-01-15T09:30:00' },
-  { id: 'n2', aluno: 'Pedro António Kiala', disciplina: 'Matemática', turma: '10ªA', trimestre: 1, valor: 12, lancadoEm: '2025-01-15T09:31:00' },
-  { id: 'n3', aluno: 'Carlos Eduardo Mbanza', disciplina: 'Matemática', turma: '10ªA', trimestre: 1, valor: 9, lancadoEm: '2025-01-15T09:32:00' },
-];
+import { useConectividade } from '../../hooks/useConectividade';
+import { sincronizarPendentes } from '../../services/notas';
+import { database } from '../../db';
+import { Q } from '@nozbe/watermelondb';
 
 export default function Sync() {
-  const [isOnline, setIsOnline] = useState(true); // TODO: usar hook useConectividade
+  const { isOnline } = useConectividade();
   const [loading, setLoading] = useState(false);
+  const [pendentes, setPendentes] = useState<any[]>([]);
+
+  const carregar = useCallback(async () => {
+    try {
+      const col = database.get('notas_pendentes' as any) as any;
+      const list: any[] = await col.query(Q.where('status', 'pendente')).fetch();
+      setPendentes(list);
+    } catch { setPendentes([]); }
+  }, []);
+
+  useEffect(() => { carregar(); }, [carregar]);
+  useEffect(() => { if (isOnline) carregar(); }, [isOnline]);
 
   async function sincronizar() {
+    if (!isOnline) { Alert.alert('Sem internet', 'Liga a internet para sincronizar.'); return; }
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 2000));
+    const res = await sincronizarPendentes();
+    await carregar();
     setLoading(false);
-    Alert.alert('Sucesso!', `${notasPendentes.length} notas enviadas com sucesso!`);
-    // TODO: chamar função real de sincronização
+    if (res.erros === 0) Alert.alert('Sucesso!', `${res.sincronizadas} notas enviadas!`);
+    else Alert.alert('Parcial', `${res.sincronizadas} enviadas, ${res.erros} erros.`);
   }
 
   function formatarData(iso: string) {
@@ -55,21 +66,23 @@ export default function Sync() {
           )}
         </View>
 
-        <Text style={styles.pendingTitle}>{notasPendentes.length} notas por sincronizar</Text>
+        <Text style={styles.pendingTitle}>{pendentes.length} notas por sincronizar</Text>
 
-        {notasPendentes.map((n) => (
+        {pendentes.length === 0 ? (
+          <View style={{ alignItems: 'center', padding: 24 }}><Text style={{ color: '#16A34A' }}>✓ Tudo sincronizado</Text></View>
+        ) : pendentes.map((n: any) => (
           <View key={n.id} style={styles.pendingCard}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.alunoName}>{n.aluno}</Text>
-              <Text style={styles.metaText}>{n.disciplina} · Turma {n.turma}</Text>
-              <Text style={styles.metaText}>Trimestre {n.trimestre}</Text>
+              <Text style={styles.alunoName}>{n.alunoId}</Text>
+              <Text style={styles.metaText}>{n.disciplinaId} · {n.turmaId}</Text>
+              <Text style={styles.metaText}>Trimestre {n.trimestre} · {n.tipo}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <View style={styles.valorBox}>
                 <Text style={styles.valorText}>{n.valor}</Text>
                 <Text style={{ color: '#9CA3AF', fontSize: 12 }}>/20</Text>
               </View>
-              <View style={styles.badge}><Text style={{ fontSize: 11, color: '#92400E' }}>Pendente</Text></View>
+              <View style={styles.badge}><Text style={{ fontSize: 11, color: '#92400E' }}>{n.status}</Text></View>
             </View>
             <Text style={styles.lancado}>Lançado em: {formatarData(n.lancadoEm)}</Text>
           </View>
