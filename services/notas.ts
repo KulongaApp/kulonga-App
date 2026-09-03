@@ -3,6 +3,7 @@
 // Esta é a parte mais importante do Kulonga
 
 import { supabase } from './supabase';
+import { salvarNotaPendente, sincronizarPendentes as syncPendentes } from '../db/sync';
 
 export interface NotaPayload {
   alunoId: string;
@@ -29,80 +30,33 @@ export async function buscarNotasAluno(alunoId: string) {
   }
 }
 
-// ── Lançar nota (guarda offline, sincroniza depois) ────────
 export async function lancarNota(
-  payload: NotaPayload
+  payload: NotaPayload & { turmaId: string; tipo: string }
 ): Promise<{ sucesso: boolean; erro?: string }> {
   try {
-    // TODO: guardar no WatermelonDB local primeiro:
-    // await database.write(async () => {
-    //   await database.get('notas_pendentes').create(n => {
-    //     n.alunoId      = payload.alunoId;
-    //     n.disciplinaId = payload.disciplinaId;
-    //     n.trimestre    = payload.trimestre;
-    //     n.valor        = payload.valor;
-    //     n.autorPapel   = payload.autorPapel;
-    //     n.autorId      = payload.autorId;
-    //     n.lancadoEm    = new Date().toISOString();
-    //     n.status       = 'pendente';
-    //   });
-    // });
-
-    // TODO: se online, sincronizar imediatamente:
-    // import NetInfo from '@react-native-community/netinfo';
-    // const { isConnected } = await NetInfo.fetch();
-    // if (isConnected) await sincronizarPendentes();
-
-    console.log('Nota lançada (mock):', payload);
+    await salvarNotaPendente({
+      alunoId: payload.alunoId,
+      disciplinaId: payload.disciplinaId,
+      turmaId: payload.turmaId,
+      trimestre: payload.trimestre,
+      tipo: payload.tipo as any,
+      valor: payload.valor,
+      autorId: payload.autorId,
+      autorPapel: payload.autorPapel,
+    });
+    try {
+      const NetInfo = (await import('@react-native-community/netinfo')).default;
+      const s = await NetInfo.fetch();
+      if (s.isConnected) await syncPendentes();
+    } catch {}
     return { sucesso: true };
   } catch (e: any) {
     return { sucesso: false, erro: e.message };
   }
 }
 
-// ── Sincronizar notas pendentes com o servidor ─────────────
-export async function sincronizarPendentes(): Promise<{
-  sincronizadas: number;
-  erros: number;
-}> {
-  try {
-    // TODO: motor de sync offline-first completo:
-    //
-    // PASSO 1: Buscar notas pendentes no WatermelonDB
-    // const pendentes = await database
-    //   .get('notas_pendentes')
-    //   .query(Q.where('status', 'pendente'))
-    //   .fetch();
-    //
-    // PASSO 2: Enviar ao servidor em batches de 50
-    // const res = await fetch(`${API_URL}/api/notas/sync`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${token}`,
-    //   },
-    //   body: JSON.stringify({ notas: pendentes }),
-    // });
-    //
-    // PASSO 3: O servidor aplica hierarquia de conflitos:
-    //   secretaria(3) > coordenador(2) > professor(1)
-    //   Em empate: nota mais recente vence
-    //
-    // PASSO 4: Marcar como sincronizadas
-    // const { aceitas } = await res.json();
-    // await database.write(async () => {
-    //   for (const id of aceitas) {
-    //     const nota = pendentes.find(n => n.id === id);
-    //     await nota?.update(n => { n.status = 'sync'; });
-    //   }
-    // });
-
-    console.log('TODO: sincronizarPendentes()');
-    return { sincronizadas: 0, erros: 0 };
-  } catch (e) {
-    console.error('Erro de sync:', e);
-    return { sincronizadas: 0, erros: 1 };
-  }
+export async function sincronizarPendentes(): Promise<{ sincronizadas: number; erros: number }> {
+  return syncPendentes();
 }
 
 // ── Gerar token de acesso (secretaria) ────────────────────
