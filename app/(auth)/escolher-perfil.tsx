@@ -8,8 +8,8 @@ export default function EscolherPerfil() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.logo}>KULONGA</Text>
-      <Text style={styles.title}>Como queres entrar?</Text>
-      <Text style={styles.subtitle}>Já tens conta? Entra. Se não, cria uma.</Text>
+      <Text style={styles.title}>Entrar ou Criar conta</Text>
+      <Text style={styles.subtitle}>Em cima: já tens conta → entra. Em baixo: não tens → cria.</Text>
 
       <TouchableOpacity style={styles.card} onPress={() => router.push('/(auth)/token-encarregado')}>
         <Text style={styles.icon}>👨‍👩‍👧</Text>
@@ -36,21 +36,25 @@ export default function EscolherPerfil() {
       </TouchableOpacity>
 
       <View style={styles.divider} />
-      <Text style={styles.noAccount}>Não tens conta?</Text>
+      <Text style={styles.noAccount}>⬇ Não tens conta? Cria uma (toca):</Text>
 
-      <TouchableOpacity onPress={() => router.push('/(auth)/cadastro-escola' as any)} style={styles.cardCreate}>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(auth)/cadastro-escola' as any)} style={styles.cardCreate}>
         <Text style={styles.cardCreateTitle}>🏫 Criar conta de escola</Text>
-        <Text style={styles.cardCreateDesc}>Registar nova escola (direcção)</Text>
+        <Text style={styles.cardCreateDesc}>Registar nova escola (direcção) →</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/(auth)/cadastro-professor' as any)} style={styles.cardCreate}>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(auth)/cadastro-professor' as any)} style={styles.cardCreate}>
         <Text style={styles.cardCreateTitle}>👨‍🏫 Criar conta de professor</Text>
-        <Text style={styles.cardCreateDesc}>Registar como professor</Text>
+        <Text style={styles.cardCreateDesc}>Registar como professor →</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/(auth)/cadastro-aluno' as any)} style={styles.cardCreate}>
+      <TouchableOpacity activeOpacity={0.7} onPress={() => router.push('/(auth)/cadastro-aluno' as any)} style={styles.cardCreate}>
         <Text style={styles.cardCreateTitle}>🎓 Criar conta de aluno</Text>
-        <Text style={styles.cardCreateDesc}>Registar como aluno</Text>
+        <Text style={styles.cardCreateDesc}>Registar como aluno →</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push('/(onboarding)/perfil' as any)} style={{ marginTop: 8 }}>
+        <Text style={{ color: '#9CA3AF', fontSize: 12 }}>Mudar preferência de perfil</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

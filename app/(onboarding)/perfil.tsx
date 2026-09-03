@@ -34,8 +34,8 @@ export default function Perfil() {
           <View style={[styles.dot]} />
           <View style={[styles.dot, styles.dotActive]} />
         </View>
-        <Text style={styles.titulo}>Como vais usar o Kulonga?</Text>
-        <Text style={styles.sub}>Escolhe o teu perfil para começar</Text>
+        <Text style={styles.titulo}>Qual é o teu perfil principal?</Text>
+        <Text style={styles.sub}>Isto só guarda a tua preferência — depois vais escolher Entrar ou Criar conta</Text>
       </View>
 
       <View style={styles.list}>
