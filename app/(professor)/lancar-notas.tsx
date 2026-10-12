@@ -15,15 +15,17 @@ import { obterEscolaDoUsuario } from '../../services/professores';
 import { listarTurmas } from '../../services/turmas';
 import { listarDisciplinas } from '../../services/disciplinas';
 import { listarAlunosTurma } from '../../services/turmas';
-import { calcularMAC, calcularMF, AvaliacaoContinua } from '../../mocks/turma-notas';
+import RelatorioTurma, { type AlunoRelatorio } from '../../components/professor/RelatorioTurma';
+import {
+  calcularMAC,
+  calcularMF,
+  corNota,
+  notaDeTexto,
+  TRIMESTRES,
+  type AvaliacaoContinua,
+  type Trimestre,
+} from '../../services/avaliacao';
 
-const TRIMESTRES: Record<number, { nome: string; meses: string[] }> = {
-  1: { nome: '1º Trimestre', meses: ['Setembro', 'Outubro', 'Novembro', 'Dezembro'] },
-  2: { nome: '2º Trimestre', meses: ['Janeiro', 'Fevereiro', 'Março', 'Abril'] },
-  3: { nome: '3º Trimestre', meses: ['Maio', 'Junho', 'Julho'] },
-};
-
-type Trimestre = 1 | 2 | 3;
 type ModoLancamento = 'menu' | 'ac' | 'pt';
 
 interface AlunoReal {
@@ -38,13 +40,6 @@ interface EstadoNotas {
     ac: { [mes: string]: string[] };
     pt: string;
   };
-}
-
-function corNota(v: number | null): string {
-  if (v === null) return '#9CA3AF';
-  if (v >= 14) return '#16A34A';
-  if (v >= 10) return '#D97706';
-  return '#DC2626';
 }
 
 export default function LancarNotas() {
@@ -162,19 +157,30 @@ export default function LancarNotas() {
     mesesTrimestre.forEach((mes, mi) => {
       const acs = notas[alunoId]?.ac[mes] || [];
       acs.forEach((v, i) =>
-        todasAC.push({ id: `${mi}-${i}`, mes, numero: i + 1, valor: v !== '' ? parseFloat(v) : null })
+        todasAC.push({ id: `${mi}-${i}`, mes, numero: i + 1, valor: notaDeTexto(v) })
       );
     });
     return calcularMAC(todasAC);
   }
 
+  function ptAluno(alunoId: string): number | null {
+    return notaDeTexto(notas[alunoId]?.pt);
+  }
+
   function mfAluno(alunoId: string): number | null {
-    const mac = macAluno(alunoId);
-    const pt = notas[alunoId]?.pt;
-    return calcularMF(mac, pt !== '' ? parseFloat(pt) : null);
+    return calcularMF(macAluno(alunoId), ptAluno(alunoId));
   }
 
   const comMF = alunos.filter((a) => mfAluno(a.id) !== null).length;
+
+  // Dados que alimentam o relatório da turma (sem mocks)
+  const alunosRelatorio: AlunoRelatorio[] = alunos.map((a) => ({
+    id: a.id,
+    numero: a.numero,
+    nome: a.nome,
+    genero: a.genero,
+    mediaFinal: mfAluno(a.id),
+  }));
 
   async function guardar() {
     if (!turmaId || !disciplinaId) {
@@ -188,13 +194,32 @@ export default function LancarNotas() {
       const linhas: any[] = [];
       for (const a of alunos) {
         const mac = macAluno(a.id);
-        const pt = notas[a.id]?.pt;
-        const ptNum = pt !== '' ? parseFloat(pt) : null;
+        const ptNum = ptAluno(a.id);
         if (mac !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'frequencia', valor: mac, autor_id: user.id, autor_papel: 'professor' });
         if (ptNum !== null) linhas.push({ aluno_id: a.id, disciplina_id: disciplinaId, turma_id: turmaId, trimestre, tipo: 'prova', valor: ptNum, autor_id: user.id, autor_papel: 'professor' });
       }
-      const { error } = await supabase.from('notas').insert(linhas);
-      if (error) throw error;
+      if (linhas.length === 0) {
+        Alert.alert('Nada para guardar', 'Ainda não lançaste nenhuma avaliação.');
+        return;
+      }
+
+      // upsert: re-lançar as mesmas notas actualiza as linhas existentes em vez
+      // de criar duplicados. O índice único vive em fix-notas-upsert-v1.sql.
+      const { error } = await supabase
+        .from('notas')
+        .upsert(linhas, {
+          onConflict: 'aluno_id,disciplina_id,trimestre,tipo,autor_papel',
+        });
+      if (error) {
+        // 42P10 = índice único ainda não criado na base de dados.
+        // Cai para insert simples para não bloquear o professor.
+        if (error.code === '42P10') {
+          const { error: erroInsert } = await supabase.from('notas').insert(linhas);
+          if (erroInsert) throw erroInsert;
+        } else {
+          throw error;
+        }
+      }
       setGuardado(true);
       setTimeout(() => {
         setGuardado(false);
@@ -209,6 +234,7 @@ export default function LancarNotas() {
 
   const turmaNome = turmas.find((t) => t.id === turmaId)?.nome ?? '—';
   const disciplinaNome = disciplinas.find((d) => d.id === disciplinaId)?.nome ?? '—';
+  const anoLectivo = turmas.find((t) => t.id === turmaId)?.ano_lectivo ?? undefined;
 
   return (
     <SafeAreaView style={s.safe}>
@@ -432,6 +458,17 @@ export default function LancarNotas() {
           )}
         </>
       )}
+
+      {/* Relatório da turma — o botão no header abre este modal */}
+      <RelatorioTurma
+        visivel={verRelatorio}
+        trimestre={trimestre}
+        turmaNome={turmaNome}
+        disciplinaNome={disciplinaNome}
+        anoLectivo={anoLectivo}
+        alunos={alunosRelatorio}
+        onFechar={() => setVerRelatorio(false)}
+      />
 
       {/* Seletor de turma/disciplina */}
       <Modal visible={selector !== null} transparent animationType="fade">

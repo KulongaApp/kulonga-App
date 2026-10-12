@@ -10,3 +10,4 @@ export * from './alunos';
 export * from './turmas';
 export * from './disciplinas';
 export * from './boletim';
+export * from './avaliacao';

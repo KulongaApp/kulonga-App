@@ -22,6 +22,17 @@ export async function salvarNotaPendente(payload: {
   });
 }
 
+/** Número de notas que estão em fila à espera de sincronizar. */
+export async function contarPendentes(): Promise<number> {
+  try {
+    const col = database.get('notas_pendentes' as any) as any;
+    const pendentes: any[] = await col.query(Q.where('status', 'pendente')).fetch();
+    return pendentes.length;
+  } catch {
+    return 0;
+  }
+}
+
 export async function sincronizarPendentes(): Promise<{ sincronizadas: number; erros: number }> {
   try {
     const col = database.get('notas_pendentes' as any) as any;

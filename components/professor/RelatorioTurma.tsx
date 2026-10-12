@@ -7,25 +7,31 @@ import {
   StyleSheet, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import {
-  turmaMock, calcularMAC, calcularMF, classificacao,
-} from '../../mocks/turma-notas';
+import { classificacao, type Genero, type Trimestre } from '../../services/avaliacao';
+
+export interface AlunoRelatorio {
+  id: string;
+  numero: string | number;
+  nome: string;
+  genero: Genero;
+  mediaFinal: number | null;
+}
 
 interface Props {
-  trimestre: 1 | 2 | 3;
-  notas: any;
+  visivel: boolean;
+  trimestre: Trimestre;
+  turmaNome: string;
+  disciplinaNome: string;
+  anoLectivo?: string;
+  alunos: AlunoRelatorio[];
   onFechar: () => void;
 }
 
-export default function RelatorioTurma({ trimestre, notas, onFechar }: Props) {
+export default function RelatorioTurma({
+  visivel, trimestre, turmaNome, disciplinaNome, anoLectivo, alunos, onFechar,
+}: Props) {
 
-  const alunosComMedia = turmaMock.alunos.map(a => {
-    const n = notas[a.id] || { frequencia: '', prova: '' };
-    const f = parseFloat(n.frequencia);
-    const p = parseFloat(n.prova);
-    const mf = calcularMF(isNaN(f) ? null : f, isNaN(p) ? null : p);
-    return { ...a, mediaFinal: mf };
-  });
+  const alunosComMedia = alunos;
 
   const avaliados = alunosComMedia.filter(a => a.mediaFinal !== null);
   const aprovados = avaliados.filter(a => a.mediaFinal! >= 10);
@@ -66,7 +72,7 @@ export default function RelatorioTurma({ trimestre, notas, onFechar }: Props) {
     .sort((a, b) => (b.mediaFinal ?? -1) - (a.mediaFinal ?? -1));
 
   return (
-    <Modal visible transparent animationType="slide">
+    <Modal visible={visivel} transparent animationType="slide">
       <View style={s.overlay}>
         <View style={s.container}>
 
@@ -77,7 +83,7 @@ export default function RelatorioTurma({ trimestre, notas, onFechar }: Props) {
                 📊 Relatório — {trimestre}º Trimestre
               </Text>
               <Text style={s.headerSub}>
-                {turmaMock.nome} · {turmaMock.disciplina} · {turmaMock.anoLetivo}
+                {turmaNome} · {disciplinaNome}{anoLectivo ? ` · ${anoLectivo}` : ''}
               </Text>
             </View>
             <TouchableOpacity onPress={onFechar} accessibilityLabel="Fechar relatório">
@@ -95,7 +101,7 @@ export default function RelatorioTurma({ trimestre, notas, onFechar }: Props) {
                   {avaliados.length}
                 </Text>
                 <Text style={s.metricLabel}>Avaliados</Text>
-                <Text style={s.metricSub}>de {turmaMock.alunos.length} alunos</Text>
+                <Text style={s.metricSub}>{alunos.length} alunos</Text>
               </View>
               <View style={[s.metricCard, { backgroundColor: '#DCFCE7' }]}>
                 <Text style={[s.metricNum, { color: '#16A34A' }]}>

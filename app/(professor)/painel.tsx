@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   ActivityIndicator,
@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import SyncStatusBar from '../../components/SyncStatusBar';
 import { useConectividade } from '../../hooks/useConectividade';
@@ -19,6 +19,7 @@ import { obterEscolaDoUsuario } from '../../services/professores';
 import { buscarEscola } from '../../services/escolas';
 import { listarTurmas } from '../../services/turmas';
 import { logout } from '../../services/auth';
+import { contarPendentes } from '../../db/sync';
 
 type Turma = {
   id: string;
@@ -29,22 +30,12 @@ type Turma = {
   periodo: 'Manhã' | 'Tarde';
 };
 
-type ProfessorMock = {
+type ProfessorPainel = {
   nome: string;
   email: string;
   escola: string;
   turmas: Turma[];
   notasPendentes: number;
-  ultimaSync: string;
-};
-
-const professorMock: ProfessorMock = {
-  nome: 'Prof. Carlos Manuel',
-  email: 'prof@kulonga.ao',
-  escola: 'Escola',
-  turmas: [],
-  notasPendentes: 0,
-  ultimaSync: '',
 };
 
 const getTotalAlunos = (turmas: Turma[]) =>
@@ -154,7 +145,19 @@ export default function PainelProfessor() {
   const router = useRouter();
   const { isOnline } = useConectividade();
   const [carregar, setCarregar] = useState(true);
-  const [prof, setProf] = useState<ProfessorMock>(professorMock);
+  const [prof, setProf] = useState<ProfessorPainel>({
+    nome: 'Professor',
+    email: '',
+    escola: 'Escola',
+    turmas: [],
+    notasPendentes: 0,
+  });
+
+  // Notas guardadas offline à espera de sincronizar
+  const recarregarPendentes = useCallback(async () => {
+    const pendentes = await contarPendentes();
+    setProf((prev) => (prev.notasPendentes === pendentes ? prev : { ...prev, notasPendentes: pendentes }));
+  }, []);
 
   async function carregarDados() {
     setCarregar(true);
@@ -168,21 +171,36 @@ export default function PainelProfessor() {
         escolaId ? buscarEscola(escolaId).catch(() => null) : Promise.resolve(null),
         escolaId ? listarTurmas(escolaId).catch(() => []) : Promise.resolve([]),
       ]);
+      const disciplinaProf = (profRow?.data?.disciplinas ?? [])[0] ?? '';
       const turmasMapeadas: Turma[] = await Promise.all((turmas as any[]).map(async (t) => {
         let total = 0;
+        let notasLancadas = 0;
         try {
           const alunos = await supabase.from('turma_alunos').select('aluno_id', { count: 'exact' }).eq('turma_id', t.id);
           total = alunos.count ?? (alunos.data?.length ?? 0);
+          // alunos distintos que já têm pelo menos uma nota nesta turma
+          const { data: notasTurma } = await supabase
+            .from('notas')
+            .select('aluno_id')
+            .eq('turma_id', t.id);
+          notasLancadas = new Set((notasTurma ?? []).map((n: any) => n.aluno_id)).size;
         } catch {}
-        return { id: t.id, nome: t.nome, disciplina: (profRow?.data?.disciplinas ?? [])[0] ?? '', totalAlunos: total, notasLancadas: 0, periodo: (t.turno as any) ?? 'Manhã' };
+        return {
+          id: t.id,
+          nome: t.nome,
+          disciplina: disciplinaProf,
+          totalAlunos: total,
+          notasLancadas,
+          periodo: (t.turno as any) ?? 'Manhã',
+        };
       }));
+      const pendentes = await contarPendentes();
       setProf({
         nome: profRow?.data?.nome ?? 'Professor',
         email: profRow?.data?.email ?? '',
         escola: escola?.nome ?? 'Escola',
         turmas: turmasMapeadas,
-        notasPendentes: 0,
-        ultimaSync: '',
+        notasPendentes: pendentes,
       });
     } catch {
       // mantém defaults
@@ -194,6 +212,13 @@ export default function PainelProfessor() {
   useEffect(() => {
     carregarDados();
   }, []);
+
+  // Ao voltar ao painel (ex.: depois de sincronizar), actualiza os pendentes
+  useFocusEffect(
+    useCallback(() => {
+      recarregarPendentes();
+    }, [recarregarPendentes])
+  );
 
   // Verifica se o utilizador tem mais do que um papel
   async function verificarPerfilDuplo() {
