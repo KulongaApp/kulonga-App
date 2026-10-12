@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS alunos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   escola_id UUID NOT NULL REFERENCES escolas(id) ON DELETE CASCADE,
   nome_completo TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  email TEXT,
   data_nascimento DATE,
   genero TEXT CHECK (genero IN ('M', 'F')),
   foto_url TEXT,
@@ -130,10 +132,13 @@ CREATE TABLE IF NOT EXISTS tokens_acesso (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   aluno_id UUID NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
   codigo TEXT NOT NULL UNIQUE,
+  tipo TEXT NOT NULL DEFAULT 'encarregado' CHECK (tipo IN ('aluno', 'encarregado')),
   qr_hash TEXT,
   ativo BOOLEAN DEFAULT true,
   expira_em TIMESTAMPTZ,
   gerado_por UUID,
+  usado_em TIMESTAMPTZ,
+  usado_por UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   criado_em TIMESTAMPTZ DEFAULT now()
 );
 

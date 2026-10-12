@@ -5,12 +5,10 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Este botão é o principal do app — laranja angolano, não tem erro
 type Props = {
   titulo: string;
   onPress: (e?: GestureResponderEvent) => void;
@@ -38,8 +36,6 @@ export default function Button({
   iconeEsquerda,
   iconeDireita,
 }: Props) {
-  const scheme = useColorScheme();
-
   const colors = {
     primario: { bg: '#C8511B', text: '#FFFFFF', border: '#C8511B' },
     secundario: { bg: '#1D5C8A', text: '#FFFFFF', border: '#1D5C8A' },
@@ -54,6 +50,7 @@ export default function Button({
   return (
     <TouchableOpacity
       accessibilityLabel={`Botão ${titulo}`}
+      accessibilityRole="button"
       activeOpacity={0.8}
       onPress={onPress}
       disabled={desactivado || carregando}
@@ -62,7 +59,7 @@ export default function Button({
         {
           backgroundColor: selected.bg,
           borderColor: selected.border,
-          opacity: desactivado ? 0.6 : 1,
+          opacity: desactivado || carregando ? 0.6 : 1,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
@@ -93,8 +90,14 @@ export default function Button({
 
 const styles = StyleSheet.create({
   button: {
+    minHeight: 48,
     borderRadius: 8,
     borderWidth: 1,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   text: {
     fontWeight: '600',

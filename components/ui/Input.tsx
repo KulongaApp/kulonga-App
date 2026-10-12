@@ -36,6 +36,7 @@ export default function Input({
   ...rest
 }: Props) {
   const [focado, setFocado] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const borderColor = erro ? '#DC2626' : focado ? '#C8511B' : '#D1D5DB';
 
@@ -49,18 +50,31 @@ export default function Input({
           </View>
         ) : null}
         <TextInput
+          {...rest}
           accessibilityLabel={`Campo ${label}`}
           style={styles.input}
           placeholder={placeholder}
           value={valor}
           onChangeText={onMudar}
-          secureTextEntry={seguro}
+          secureTextEntry={seguro && !mostrarSenha}
           keyboardType={teclado}
+          placeholderTextColor="#9CA3AF"
+          autoCapitalize={rest.autoCapitalize ?? (teclado === 'email-address' ? 'none' : 'sentences')}
           editable={!desactivado}
           onFocus={() => setFocado(true)}
           onBlur={() => setFocado(false)}
-          {...rest}
         />
+        {seguro ? (
+          <TouchableOpacity
+            onPress={() => setMostrarSenha((visivel) => !visivel)}
+            accessibilityRole="button"
+            accessibilityLabel={mostrarSenha ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'}
+            hitSlop={10}
+            style={styles.toggleSenha}
+          >
+            <Ionicons name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'} size={19} color="#6B7280" />
+          </TouchableOpacity>
+        ) : null}
       </View>
       {erro ? <Text style={styles.error}>{erro}</Text> : null}
     </View>
@@ -68,17 +82,19 @@ export default function Input({
 }
 
 const styles = StyleSheet.create({
-  wrapper: { marginBottom: 12 },
-  label: { marginBottom: 6, fontWeight: '600' },
+  wrapper: { marginBottom: 16 },
+  label: { marginBottom: 7, fontWeight: '700', color: '#1F2937', fontSize: 14 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 8,
+    minHeight: 50,
+    borderRadius: 10,
     paddingHorizontal: 8,
     backgroundColor: '#fff',
   },
   iconLeft: { marginRight: 8 },
-  input: { flex: 1, paddingVertical: 10 },
-  error: { color: '#DC2626', marginTop: 6 },
+  input: { flex: 1, paddingVertical: 12, color: '#111827', fontSize: 16 },
+  toggleSenha: { padding: 6, marginLeft: 4 },
+  error: { color: '#B91C1C', marginTop: 6, fontSize: 13, lineHeight: 18 },
 });

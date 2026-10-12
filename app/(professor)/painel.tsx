@@ -302,6 +302,14 @@ export default function PainelProfessor() {
                   <Ionicons name="people-outline" size={20} color="#fff" />
                   <Text style={styles.actionText}>Ver Alunos</Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: '#15803D' }]}
+                  onPress={() => router.push('/(professor)/assiduidade' as any)}
+                  accessibilityLabel="Registar Assiduidade"
+                >
+                  <Ionicons name="checkmark-done-outline" size={20} color="#fff" />
+                  <Text style={styles.actionText}>Assiduidade</Text>
+                </TouchableOpacity>
               </View>
             </View>
 

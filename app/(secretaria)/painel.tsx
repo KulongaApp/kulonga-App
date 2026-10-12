@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -129,9 +130,9 @@ export default function SecretariaPainel() {
         </View>
 
         {carregar ? (
-          <Text style={styles.erro}>A carregar...</Text>
+          <View style={styles.estado}><ActivityIndicator color="#1D5C8A" /><Text style={styles.estadoTexto}>A carregar os dados da escola…</Text></View>
         ) : erro ? (
-          <Text style={styles.erro}>{erro}</Text>
+          <View style={styles.estado}><Ionicons name="alert-circle-outline" size={28} color="#B91C1C" /><Text style={styles.erro}>{erro}</Text><TouchableOpacity style={styles.tentarBtn} onPress={carregarTudo}><Text style={styles.tentarTxt}>Tentar novamente</Text></TouchableOpacity></View>
         ) : (
           <>
             {aba === 'inicio' && (
@@ -326,17 +327,21 @@ export default function SecretariaPainel() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F3F4F6' },
+  safe: { flex: 1, backgroundColor: '#F8FAFC' },
   scroll: { padding: 16, paddingBottom: 100 },
   header: { backgroundColor: '#1D5C8A', borderRadius: 12, padding: 16, marginBottom: 12, flexDirection: 'row', alignItems: 'center' },
   escolaNome: { color: '#fff', fontSize: 18, fontWeight: '800' },
   escolaSub: { color: '#BFDBFE', marginTop: 4 },
-  erro: { color: '#DC2626', fontSize: 14, marginTop: 12, textAlign: 'center' },
+  erro: { color: '#B91C1C', fontSize: 14, marginTop: 8, textAlign: 'center' },
+  estado: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, paddingHorizontal: 24 },
+  estadoTexto: { color: '#64748B', fontSize: 14, marginTop: 12, textAlign: 'center' },
+  tentarBtn: { marginTop: 16, borderRadius: 10, backgroundColor: '#E8F1F8', paddingHorizontal: 16, paddingVertical: 11 },
+  tentarTxt: { color: '#1D5C8A', fontWeight: '700' },
   vazio: { color: '#9CA3AF', fontSize: 14, textAlign: 'center', marginTop: 12 },
-  tabsRow: { flexDirection: 'row', marginTop: 8, marginBottom: 12, gap: 8 },
-  abaBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 999, marginRight: 8, backgroundColor: 'transparent' },
-  abaAtiva: { backgroundColor: '#fff' },
-  abaTxt: { color: '#fff', fontWeight: '700' },
+  tabsRow: { flexDirection: 'row', marginTop: 8, marginBottom: 16, gap: 4, padding: 4, borderRadius: 14, backgroundColor: '#fff', shadowColor: '#0F172A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 1 },
+  abaBtn: { flex: 1, minHeight: 42, paddingVertical: 8, paddingHorizontal: 4, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  abaAtiva: { backgroundColor: '#E8F1F8' },
+  abaTxt: { color: '#64748B', fontWeight: '700', fontSize: 11, textAlign: 'center' },
   abaTxtAtiva: { color: '#1D5C8A' },
   metricasGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12 },
   metricaCard: { width: '48%', borderRadius: 12, padding: 14, marginBottom: 12 },

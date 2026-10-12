@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { listarAlunos } from '../../services/alunos';
 import { obterEscolaDoUsuario } from '../../services/professores';
-import { gerarTokenAluno } from '../../services/notas';
+import { gerarTokensAcesso, TokensAcesso } from '../../services/notas';
 
 interface Aluno {
   id: string;
@@ -33,7 +33,7 @@ export default function GerarTokenSecretaria() {
   const [carregar, setCarregar] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const [tokenGerado, setTokenGerado] = useState('');
+  const [tokensGerados, setTokensGerados] = useState<TokensAcesso | null>(null);
   const [alunoSelecionado, setAlunoSelecionado] = useState<Aluno | null>(null);
 
   useEffect(() => {
@@ -60,21 +60,21 @@ export default function GerarTokenSecretaria() {
     try {
       const { data: { user } } = await (await import('../../services/supabase')).supabase.auth.getUser();
       if (!user) throw new Error('Sessão não encontrada.');
-      const { sucesso, codigo, erro } = await gerarTokenAluno(aluno.id, user.id);
-      if (!sucesso) throw new Error(erro ?? 'Falhou.');
-      setTokenGerado(codigo ?? '');
+      const { sucesso, tokens, erro } = await gerarTokensAcesso(aluno.id, user.id);
+      if (!sucesso || !tokens) throw new Error(erro ?? 'Falhou.');
+      setTokensGerados(tokens);
       setAlunoSelecionado(aluno);
     } catch (e: any) {
       Alert.alert('Erro', e?.message ?? 'Não foi possível gerar o token.');
     }
   }
 
-  async function copiarCodigo() {
-    if (!tokenGerado) return;
+  async function copiarCodigo(codigo: string) {
+    if (!codigo) return;
     try {
       // @ts-ignore
       const clipboard = (await import('expo-clipboard')) as any;
-      await clipboard.setStringAsync(tokenGerado);
+      await clipboard.setStringAsync(codigo);
       Alert.alert('Copiado', 'Código copiado para a área de transferência');
     } catch {
       Alert.alert('Copiar código', 'Não foi possível copiar no ambiente actual. Guarda o código manualmente.');
@@ -90,7 +90,7 @@ export default function GerarTokenSecretaria() {
           </TouchableOpacity>
           <View style={styles.headerTextos}>
             <Text style={styles.titulo}>Gerar Token de Acesso</Text>
-            <Text style={styles.subtitulo}>O encarregado usa este código para aceder às notas do seu educando</Text>
+            <Text style={styles.subtitulo}>Gera um código para o aluno e outro para o encarregado de educação</Text>
           </View>
         </View>
 
@@ -133,15 +133,21 @@ export default function GerarTokenSecretaria() {
               <Ionicons name="checkmark-circle" size={64} color="#16A34A" />
               <Text style={styles.modalTitulo}>Token gerado com sucesso!</Text>
               <Text style={styles.modalAluno}>{alunoSelecionado?.nome_completo}</Text>
-              <Text style={styles.modalCodigo}>{formatToken(tokenGerado)}</Text>
-              <Text style={styles.modalInstrucoes}>Entrega este código ao encarregado de educação pessoalmente ou imprime.</Text>
-              <TouchableOpacity style={styles.modalBotao} onPress={copiarCodigo}>
-                <Text style={styles.modalBotaoTxt}>Copiar código</Text>
+              <Text style={styles.modalRotulo}>Token do aluno</Text>
+              <Text style={styles.modalCodigo}>{tokensGerados ? formatToken(tokensGerados.aluno) : ''}</Text>
+              <TouchableOpacity style={styles.modalBotao} onPress={() => copiarCodigo(tokensGerados?.aluno ?? '')}>
+                <Text style={styles.modalBotaoTxt}>Copiar token do aluno</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBotao, styles.modalBotaoSecundario]} onPress={() => { setAlunoSelecionado(null); setTokenGerado(''); }}>
+              <Text style={styles.modalRotulo}>Token do encarregado</Text>
+              <Text style={styles.modalCodigo}>{tokensGerados ? formatToken(tokensGerados.encarregado) : ''}</Text>
+              <TouchableOpacity style={styles.modalBotao} onPress={() => copiarCodigo(tokensGerados?.encarregado ?? '')}>
+                <Text style={styles.modalBotaoTxt}>Copiar token do encarregado</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalInstrucoes}>Entrega cada código à pessoa correspondente. Não partilhes o token do aluno com terceiros.</Text>
+              <TouchableOpacity style={[styles.modalBotao, styles.modalBotaoSecundario]} onPress={() => { setAlunoSelecionado(null); setTokensGerados(null); }}>
                 <Text style={[styles.modalBotaoTxt, styles.modalBotaoSecundarioTxt]}>Fechar</Text>
               </TouchableOpacity>
-              <Text style={styles.modalAviso}>⚠ Guarda este código agora. Por segurança não é possível recuperá-lo.</Text>
+              <Text style={styles.modalAviso}>Guarda os códigos com a escola. Ao reemitir, os anteriores deixam de funcionar.</Text>
             </View>
           </View>
         </Modal>
@@ -172,6 +178,7 @@ const styles = StyleSheet.create({
   modalConteudo: { width: '100%', backgroundColor: '#fff', borderRadius: 24, padding: 24, alignItems: 'center' },
   modalTitulo: { marginTop: 16, fontSize: 20, fontWeight: '800', textAlign: 'center' },
   modalAluno: { marginTop: 10, fontSize: 16, fontWeight: '700', color: '#111827', textAlign: 'center' },
+  modalRotulo: { marginTop: 16, fontSize: 12, fontWeight: '700', color: '#6B7280', textTransform: 'uppercase' },
   modalCodigo: { marginTop: 18, fontSize: 26, fontWeight: '800', color: '#C8511B', letterSpacing: 3, textAlign: 'center' },
   modalInstrucoes: { marginTop: 12, color: '#6B7280', textAlign: 'center', lineHeight: 20 },
   modalBotao: { marginTop: 18, width: '100%', backgroundColor: '#1D5C8A', borderRadius: 14, paddingVertical: 14, alignItems: 'center' },

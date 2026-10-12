@@ -8,3 +8,4 @@ export { default as AudioPlayButton } from './AudioPlayButton';
 export { default as ProfessorContactCard } from './ProfessorContactCard';
 export { default as TrimestreFilter } from './TrimestreFilter';
 export { default as TabBar } from './TabBar';
+export { default as AppShell } from './AppShell';

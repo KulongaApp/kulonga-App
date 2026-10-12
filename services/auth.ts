@@ -43,7 +43,54 @@ export async function loginComEmail(
 export interface ResultadoToken {
   valido: boolean;
   alunoId?: string;
+  nomeAluno?: string;
+  escolaId?: string;
   erro?: string;
+}
+
+export type TipoConvite = 'aluno' | 'encarregado';
+
+// Valida o convite sem criar uma sessão ou um registo anónimo.
+export async function prevalidarToken(
+  codigo: string,
+  tipo: TipoConvite,
+): Promise<ResultadoToken> {
+  try {
+    const { data, error } = await supabase
+      .rpc('validar_token_acesso', { p_codigo: codigo, p_tipo: tipo })
+      .maybeSingle();
+    const row = data as { aluno_id: string; nome_aluno: string; escola_id: string } | null;
+    if (error || !row) return { valido: false, erro: 'Convite inválido ou expirado' };
+    return {
+      valido: true,
+      alunoId: row.aluno_id,
+      nomeAluno: row.nome_aluno,
+      escolaId: row.escola_id,
+    };
+  } catch {
+    return { valido: false, erro: 'Convite inválido ou expirado' };
+  }
+}
+
+// Deve ser chamado apenas depois de o Supabase Auth criar a conta.
+export async function activarContaPorToken(
+  codigo: string,
+  tipo: TipoConvite,
+  email: string,
+  nome?: string,
+): Promise<{ sucesso: boolean; alunoId?: string; erro?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('activar_conta_por_token', {
+      p_codigo: codigo,
+      p_tipo: tipo,
+      p_email: email,
+      p_nome: nome ?? null,
+    });
+    if (error) return { sucesso: false, erro: error.message };
+    return { sucesso: true, alunoId: data as string };
+  } catch (e: any) {
+    return { sucesso: false, erro: e?.message ?? 'Não foi possível activar o convite' };
+  }
 }
 
 export async function validarTokenEncarregado(

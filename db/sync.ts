@@ -5,23 +5,21 @@ import { Q } from '@nozbe/watermelondb';
 export async function salvarNotaPendente(payload: {
   alunoId: string; disciplinaId: string; turmaId: string; trimestre: number; tipo: string; valor: number; autorId: string; autorPapel: string;
 }) {
-  try {
-    await database.write(async () => {
-      const col = database.get('notas_pendentes' as any);
-      await (col as any).create((r: any) => {
-        r.alunoId = payload.alunoId;
-        r.disciplinaId = payload.disciplinaId;
-        r.turmaId = payload.turmaId;
-        r.trimestre = payload.trimestre;
-        r.tipo = payload.tipo;
-        r.valor = payload.valor;
-        r.autorId = payload.autorId;
-        r.autorPapel = payload.autorPapel;
-        r.status = 'pendente';
-        r.lancadoEm = new Date().toISOString();
-      });
+  await database.write(async () => {
+    const col = database.get('notas_pendentes' as any);
+    await (col as any).create((r: any) => {
+      r.alunoId = payload.alunoId;
+      r.disciplinaId = payload.disciplinaId;
+      r.turmaId = payload.turmaId;
+      r.trimestre = payload.trimestre;
+      r.tipo = payload.tipo;
+      r.valor = payload.valor;
+      r.autorId = payload.autorId;
+      r.autorPapel = payload.autorPapel;
+      r.status = 'pendente';
+      r.lancadoEm = new Date().toISOString();
     });
-  } catch {}
+  });
 }
 
 export async function sincronizarPendentes(): Promise<{ sincronizadas: number; erros: number }> {

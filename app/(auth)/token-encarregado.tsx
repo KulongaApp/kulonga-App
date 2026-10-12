@@ -16,14 +16,15 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { validarTokenEncarregado } from '../../services/auth';
+import { prevalidarToken, TipoConvite } from '../../services/auth';
 
 // O pai não pode errar o código — por isso as caixas são grandes e claras
 export default function TokenEncarregado() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ tipo?: string }>();
+  const tipo: TipoConvite = params.tipo === 'aluno' ? 'aluno' : 'encarregado';
   const [digitos, setDigitos] = useState<string[]>(['', '', '', '', '', '']);
   const refs = useRef<Array<TextInput | null>>([]);
   const [loading, setLoading] = useState(false);
@@ -68,18 +69,14 @@ export default function TokenEncarregado() {
   async function validar() {
     setLoading(true);
     setErro('');
-    const res = await validarTokenEncarregado(codigoCompleto);
+    const res = await prevalidarToken(codigoCompleto, tipo);
     setLoading(false);
 
     if (res.valido && res.alunoId) {
-      const ex = await AsyncStorage.getItem('kulonga_papeis');
-      const lista: string[] = ex ? JSON.parse(ex) : [];
-      if (!lista.includes('encarregado')) lista.push('encarregado');
-      await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(lista));
-      await AsyncStorage.setItem('kulonga_papel_activo', 'encarregado');
-      await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
-      await AsyncStorage.setItem('kulonga_aluno_id', res.alunoId);
-      router.replace('/(encarregado)' as any);
+      router.push({
+        pathname: '/(auth)/cadastro-token' as any,
+        params: { codigo: codigoCompleto, tipo, nomeAluno: res.nomeAluno ?? '' },
+      });
       return;
     }
 
@@ -101,7 +98,7 @@ export default function TokenEncarregado() {
 
           <View style={styles.center}>
             <Image source={require('../../assets/icon.png')} style={styles.logo} />
-            <Text style={styles.title}>Código de Acesso</Text>
+            <Text style={styles.title}>{tipo === 'aluno' ? 'Acesso do Aluno' : 'Acesso do Encarregado'}</Text>
             <View style={styles.subtitleRow}>
               <Text style={styles.subtitle}>
                 Insere o código de 6 dígitos que a escola te entregou no acto da matrícula

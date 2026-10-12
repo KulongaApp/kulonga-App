@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
-import { TabBar } from '../../components';
+import { AppShell, TabBar } from '../../components';
 
 export default function EncarregadoLayout() {
   const tabs = [
@@ -13,7 +13,7 @@ export default function EncarregadoLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <AppShell perfil="encarregado"><Stack screenOptions={{ headerShown: false }} /></AppShell>
       <TabBar perfil="encarregado" rotas={tabs} />
     </View>
   );

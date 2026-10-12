@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-
+import { AppShell } from '../../components';
 export default function ProfessorLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <AppShell perfil="professor"><Stack screenOptions={{ headerShown: false }} /></AppShell>;
 }

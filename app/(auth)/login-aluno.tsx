@@ -25,7 +25,7 @@ export default function LoginAluno() {
     await AsyncStorage.setItem('kulonga_papeis', JSON.stringify(papeis));
     await AsyncStorage.setItem('kulonga_papel_activo', papeis.includes('aluno') ? 'aluno' : papeis[0]);
     await AsyncStorage.setItem('kulonga_sessao_activa', 'true');
-    router.replace(papeis.includes('aluno') ? '/(aluno)/painel' as any : `/( ${papeis[0]})` as any);
+    router.replace(papeis.includes('aluno') ? '/(aluno)/painel' as any : `/(${papeis[0]})` as any);
   };
   return (
     <SafeAreaView style={s.safe}>
@@ -41,7 +41,7 @@ export default function LoginAluno() {
             {erro ? <Text style={s.erro}>{erro}</Text> : null}
             <Button titulo="Entrar" onPress={handleSubmit(onSubmit) as any} variante="primario" tamanho="grande" carregando={loading} />
           </View>
-          <View style={s.rodape}><Text style={s.rodapeTxt}>Não tens conta?</Text><TouchableOpacity onPress={() => router.push('/(auth)/cadastro-aluno' as any)}><Text style={s.link}>Registar aluno</Text></TouchableOpacity></View>
+          <View style={s.rodape}><Text style={s.rodapeTxt}>Primeiro acesso?</Text><TouchableOpacity onPress={() => router.push({ pathname: '/(auth)/token-encarregado', params: { tipo: 'aluno' } })}><Text style={s.link}>Usar código da escola</Text></TouchableOpacity></View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

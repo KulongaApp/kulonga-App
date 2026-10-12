@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
-import { TabBar } from '../../components';
+import { AppShell, TabBar } from '../../components';
 
 export default function SecretariaLayout() {
   const tabs = [
@@ -14,7 +14,7 @@ export default function SecretariaLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <AppShell perfil="secretaria"><Stack screenOptions={{ headerShown: false }} /></AppShell>
       <TabBar perfil="secretaria" rotas={tabs} />
     </View>
   );

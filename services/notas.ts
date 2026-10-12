@@ -59,26 +59,51 @@ export async function sincronizarPendentes(): Promise<{ sincronizadas: number; e
   return syncPendentes();
 }
 
-// ── Gerar token de acesso (secretaria) ────────────────────
-export async function gerarTokenAluno(
+// ── Gerar convites de acesso (secretaria) ─────────────────
+export interface TokensAcesso {
+  aluno: string;
+  encarregado: string;
+}
+
+function novoCodigoAcesso(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+export async function gerarTokensAcesso(
   alunoId: string,
   geradoPor: string
-): Promise<{ sucesso: boolean; codigo?: string; erro?: string }> {
+): Promise<{ sucesso: boolean; tokens?: TokensAcesso; erro?: string }> {
   try {
-    const codigo = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
+    const tokens: TokensAcesso = { aluno: novoCodigoAcesso(), encarregado: novoCodigoAcesso() };
+    const { error: revokeError } = await supabase
+      .from('tokens_acesso')
+      .update({ ativo: false })
+      .eq('aluno_id', alunoId)
+      .eq('tipo', 'aluno')
+      .eq('ativo', true);
+    if (revokeError) throw revokeError;
 
-    const { error } = await supabase.from('tokens_acesso').insert({
-      aluno_id: alunoId,
-      codigo,
-      ativo: true,
-      gerado_por: geradoPor,
-    });
+    const { error } = await supabase.from('tokens_acesso').insert([
+      { aluno_id: alunoId, codigo: tokens.aluno, tipo: 'aluno', ativo: true, gerado_por: geradoPor },
+      { aluno_id: alunoId, codigo: tokens.encarregado, tipo: 'encarregado', ativo: true, gerado_por: geradoPor },
+    ]);
     if (error) throw error;
 
-    return { sucesso: true, codigo };
+    return { sucesso: true, tokens };
   } catch (e: any) {
     return { sucesso: false, erro: e.message };
   }
+}
+
+// Compatibilidade para consumidores antigos: devolve o convite do encarregado.
+export async function gerarTokenAluno(
+  alunoId: string,
+  geradoPor: string,
+): Promise<{ sucesso: boolean; codigo?: string; erro?: string }> {
+  const resultado = await gerarTokensAcesso(alunoId, geradoPor);
+  return {
+    sucesso: resultado.sucesso,
+    codigo: resultado.tokens?.encarregado,
+    erro: resultado.erro,
+  };
 }
