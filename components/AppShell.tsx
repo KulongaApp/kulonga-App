@@ -2,6 +2,7 @@ import React, { PropsWithChildren, useMemo, useState } from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { usePathname, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { anoLectivoActual } from '../constants/anoLectivo';
 
 type Perfil = 'secretaria' | 'professor' | 'aluno' | 'encarregado';
 type Item = { label: string; icon: keyof typeof Ionicons.glyphMap; route: string };
@@ -59,7 +60,7 @@ export default function AppShell({ perfil, children }: PropsWithChildren<{ perfi
   return <View style={styles.root}>
     {desktop ? <View style={[styles.sidebar, { width: largura }]}>
       <View style={styles.brand}><View style={styles.brandMark}><Text style={styles.brandMarkText}>K</Text></View>{!recolhida && <View><Text style={styles.brandName}>KULONGA</Text><Text style={styles.brandCaption}>Gestão escolar</Text></View>}</View>
-      {!recolhida && <View style={styles.schoolBox}><Ionicons name="business-outline" size={18} color="#F59E0B" /><View><Text style={styles.schoolName}>A minha escola</Text><Text style={styles.schoolYear}>Ano lectivo 2025/2026</Text></View></View>}
+      {!recolhida && <View style={styles.schoolBox}><Ionicons name="business-outline" size={18} color="#F59E0B" /><View><Text style={styles.schoolName}>A minha escola</Text><Text style={styles.schoolYear}>Ano lectivo {anoLectivoActual()}</Text></View></View>}
       <View style={styles.menu}>{menu.map((item) => { const active = pathname === item.route || pathname.startsWith(item.route.replace('painel', '')); return <TouchableOpacity key={item.label} style={[styles.menuItem, active && styles.menuItemActive]} onPress={() => router.push(item.route as any)} accessibilityRole="button" accessibilityLabel={item.label}><Ionicons name={item.icon} size={20} color={active ? '#2457D6' : '#94A3B8'} />{!recolhida && <Text style={[styles.menuText, active && styles.menuTextActive]}>{item.label}</Text>}</TouchableOpacity>; })}</View>
       <TouchableOpacity style={styles.collapse} onPress={() => setRecolhida((value) => !value)} accessibilityLabel={recolhida ? 'Expandir menu' : 'Recolher menu'}><Ionicons name={recolhida ? 'chevron-forward' : 'chevron-back'} size={18} color="#64748B" />{!recolhida && <Text style={styles.collapseText}>Recolher menu</Text>}</TouchableOpacity>
     </View> : null}

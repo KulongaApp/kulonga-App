@@ -1,14 +1,9 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { CORES } from '../constants/marca';
 
 export default function Splash() {
   const router = useRouter();
@@ -47,11 +42,7 @@ export default function Splash() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}> 
-        <View style={styles.topo}>
-          <Text style={styles.topoText}>KULONGA</Text>
-        </View>
-
+      <Animated.View style={[styles.container, { opacity, transform: [{ translateY }] }]}>
         <View style={styles.centro}>
           <Image source={require('../assets/icon.png')} style={styles.icon} />
           <Text style={styles.logo}>KULONGA</Text>
@@ -60,8 +51,8 @@ export default function Splash() {
         </View>
 
         <View style={styles.rodape}>
-          <Text style={styles.by}>Kulonga</Text>
-          <Text style={styles.copyright}>© 2025 Kulonga — Educação</Text>
+          <Text style={styles.by}>Kulonga — Educação</Text>
+          <Text style={styles.copyright}>© {new Date().getFullYear()} Kulonga</Text>
         </View>
       </Animated.View>
     </SafeAreaView>
@@ -69,16 +60,14 @@ export default function Splash() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#1D5C8A' },
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  topo: { position: 'absolute', top: 60, alignItems: 'center' },
-  topoText: { color: '#fff', fontWeight: '800', letterSpacing: 4, fontSize: 14 },
-  centro: { alignItems: 'center' },
+  safe: { flex: 1, backgroundColor: CORES.azul },
+  container: { flex: 1, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 24 },
+  centro: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   icon: { width: 120, height: 120 },
-  logo: { color: '#fff', fontSize: 32, fontWeight: '800', marginTop: 24, letterSpacing: 6 },
-  line: { marginTop: 8, width: 48, height: 2, backgroundColor: '#B8922A', borderRadius: 1 },
-  tagline: { marginTop: 12, color: '#93C5FD', fontSize: 14, fontStyle: 'italic' },
-  rodape: { position: 'absolute', bottom: 40, alignItems: 'center' },
-  by: { color: '#5B8FBF', fontSize: 13, marginBottom: 4 },
-  copyright: { color: '#3A6A8A', fontSize: 11 },
+  logo: { color: CORES.branco, fontSize: 32, fontWeight: '800', marginTop: 24, letterSpacing: 6 },
+  line: { marginTop: 8, width: 48, height: 2, backgroundColor: CORES.ouro, borderRadius: 1 },
+  tagline: { marginTop: 12, color: CORES.azulClaro, fontSize: 14, fontStyle: 'italic' },
+  rodape: { alignItems: 'center' },
+  by: { color: CORES.azulClaro, fontSize: 13, marginBottom: 4 },
+  copyright: { color: CORES.azulClaro, fontSize: 11, opacity: 0.7 },
 });

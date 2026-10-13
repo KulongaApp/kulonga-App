@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { CORES } from '../../constants/marca';
 
 type Props = {
   titulo: string;
@@ -37,10 +38,10 @@ export default function Button({
   iconeDireita,
 }: Props) {
   const colors = {
-    primario: { bg: '#C8511B', text: '#FFFFFF', border: '#C8511B' },
-    secundario: { bg: '#1D5C8A', text: '#FFFFFF', border: '#1D5C8A' },
-    perigo: { bg: '#DC2626', text: '#FFFFFF', border: '#DC2626' },
-    fantasma: { bg: 'transparent', text: '#C8511B', border: '#C8511B' },
+    primario: { bg: CORES.laranja, text: CORES.branco, border: CORES.laranja },
+    secundario: { bg: CORES.azul, text: CORES.branco, border: CORES.azul },
+    perigo: { bg: CORES.vermelho, text: CORES.branco, border: CORES.vermelho },
+    fantasma: { bg: 'transparent', text: CORES.laranja, border: CORES.laranja },
   } as const;
 
   const selected = colors[variante];

@@ -30,8 +30,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
-.env*.local
+# local env files (a app usa chaves públicas na build, mas chaves privadas nunca entram no repo)
+.env*
 
 # typescript
 *.tsbuildinfo

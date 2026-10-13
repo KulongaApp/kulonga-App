@@ -1,19 +1,20 @@
 import React from 'react';
 import { Stack } from 'expo-router';
-import { SafeAreaView, StyleSheet, useColorScheme, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { CORES } from '../../constants/marca';
 
-// Layout do auth: fundo branco / dark mode escuro
+// Layout do auth: fundo claro fixo.
+// A área segura é tratada por cada ecrã (react-native-safe-area-context),
+// por isso não se usa SafeAreaView aqui — evita margens duplicadas.
+// Antes tinha fundo escuro em dark mode, o que deixava os títulos (a preto) ilegíveis.
 export default function AuthLayout() {
-  const scheme = useColorScheme();
-  const backgroundColor = scheme === 'dark' ? '#0f172a' : '#ffffff';
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]}> 
-      <View style={{ flex: 1 }}>
-        <Stack screenOptions={{ headerShown: false }} />
-      </View>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </View>
   );
 }
 
-const styles = StyleSheet.create({ container: { flex: 1 } });
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: CORES.branco },
+});

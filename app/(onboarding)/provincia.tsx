@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TouchableOpacity, FlatList,
-  StyleSheet, Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CORES } from '../../constants/marca';
 
 // As 18 províncias de Angola com cores regionais
 const PROVINCIAS = [
@@ -32,9 +31,15 @@ export default function Provincia() {
   const [seleccionada, setSeleccionada] = useState<string | null>(null);
   const router = useRouter();
 
-  function continuar() {
+  async function continuar() {
     if (!seleccionada) return;
-    // TODO: guardar no Supabase o perfil da escola/utilizador
+    // Guarda localmente a província escolhida (para futuras sugestões de escolas).
+    // Sincronização com Supabase fica para quando houver conta associada.
+    try {
+      await AsyncStorage.setItem('kulonga_provincia', seleccionada);
+    } catch {
+      // Sem armazenamento local, seguimos na mesma com o onboarding.
+    }
     router.push('/(onboarding)/lingua');
   }
 
@@ -65,6 +70,11 @@ export default function Provincia() {
     <SafeAreaView style={s.safe}>
       {/* Topo */}
       <View style={s.topo}>
+        <View style={s.progress}>
+          <View style={[s.dot, s.dotActive]} />
+          <View style={s.dot} />
+          <View style={s.dot} />
+        </View>
         <Text style={s.logo}>KULONGA</Text>
         <Text style={s.sub}>A escola no teu bolso</Text>
         <Text style={s.titulo}>Selecciona a tua província</Text>
@@ -88,7 +98,7 @@ export default function Provincia() {
           disabled={!seleccionada}
           accessibilityLabel="Continuar para escolher língua"
         >
-          <Text style={s.btnTxt}>
+          <Text style={[s.btnTxt, !seleccionada && s.btnTxtDesact]}>
             {seleccionada ? `Continuar com ${seleccionada}` : 'Selecciona uma província'}
           </Text>
         </TouchableOpacity>
@@ -98,16 +108,19 @@ export default function Provincia() {
 }
 
 const s = StyleSheet.create({
-  safe:     { flex: 1, backgroundColor: '#F8F9FA' },
-  topo:     { alignItems: 'center', paddingTop: 16, paddingBottom: 12, backgroundColor: '#fff',
+  safe:     { flex: 1, backgroundColor: CORES.fundo },
+  topo:     { alignItems: 'center', paddingTop: 16, paddingBottom: 12, backgroundColor: CORES.branco,
                borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  logo:     { fontSize: 28, fontWeight: '800', color: '#C8511B', letterSpacing: 2 },
-  sub:      { fontSize: 13, color: '#9CA3AF', marginTop: 2 },
-  titulo:   { fontSize: 16, fontWeight: '600', color: '#1F2937', marginTop: 8 },
+  progress: { flexDirection: 'row', marginBottom: 12 },
+  dot:      { width: 8, height: 8, borderRadius: 4, backgroundColor: CORES.borda, marginHorizontal: 6 },
+  dotActive:{ backgroundColor: CORES.laranja },
+  logo:     { fontSize: 28, fontWeight: '800', color: CORES.laranja, letterSpacing: 2 },
+  sub:      { fontSize: 13, color: CORES.textoFraco, marginTop: 2 },
+  titulo:   { fontSize: 16, fontWeight: '600', color: CORES.texto, marginTop: 8 },
   lista:    { padding: 12 },
-  item:     { flex: 1, margin: 5, backgroundColor: '#fff', borderRadius: 12,
+  item:     { flex: 1, margin: 5, backgroundColor: CORES.branco, borderRadius: 12,
                paddingVertical: 14, paddingHorizontal: 6, alignItems: 'center',
-               borderWidth: 1.5, borderColor: '#E5E7EB',
+               borderWidth: 1.5, borderColor: CORES.borda,
                elevation: 1, shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4,
                position: 'relative', minHeight: 80 },
   emoji:    { fontSize: 22, marginBottom: 6 },
@@ -115,10 +128,11 @@ const s = StyleSheet.create({
                textAlign: 'center' },
   check:    { position: 'absolute', top: 6, right: 6, width: 18, height: 18,
                borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  rodape:   { padding: 16, backgroundColor: '#fff',
+  rodape:   { padding: 16, backgroundColor: CORES.branco,
                borderTopWidth: 1, borderTopColor: '#F0F0F0' },
-  btn:      { backgroundColor: '#C8511B', borderRadius: 12, padding: 16,
+  btn:      { backgroundColor: CORES.laranja, borderRadius: 12, padding: 16,
                alignItems: 'center' },
   btnDesact:{ backgroundColor: '#D1D5DB' },
-  btnTxt:   { color: '#fff', fontSize: 15, fontWeight: '700' },
+  btnTxt:   { color: CORES.branco, fontSize: 15, fontWeight: '700' },
+  btnTxtDesact: { color: '#6B7280' },
 });

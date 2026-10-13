@@ -14,6 +14,9 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { buscarNotasAluno } from '../../services/notas';
 import { buscarAluno } from '../../services/alunos';
+import { supabase } from '../../services/supabase';
+import { corNota } from '../../services/avaliacao';
+import { anoLectivoActual } from '../../constants/anoLectivo';
 
 interface LinhaNota {
   disciplina_nome?: string;
@@ -29,12 +32,6 @@ interface DisciplinaAgrupada {
   nome: string;
   professor: string;
   trimestres: Record<number, number[]>;
-}
-
-function corNota(nota: number) {
-  if (nota >= 14) return '#16A34A';
-  if (nota >= 10) return '#D97706';
-  return '#DC2626';
 }
 
 function estado(media: number) {
@@ -54,6 +51,7 @@ export default function Boletim() {
   const [erro, setErro] = useState<string | null>(null);
   const [nomeAluno, setNomeAluno] = useState('');
   const [turmaAluno, setTurmaAluno] = useState('');
+  const [anoLetivo, setAnoLetivo] = useState('');
   const [disciplinas, setDisciplinas] = useState<DisciplinaAgrupada[]>([]);
   const [trimestreActivo, setTrimestreActivo] = useState<1 | 2 | 3>(1);
 
@@ -65,8 +63,18 @@ export default function Boletim() {
         const aluno = await buscarAluno(alunoId).catch(() => null);
         if (aluno) {
           setNomeAluno(aluno.nome_completo ?? '');
-          setTurmaAluno(aluno.turma ?? '');
         }
+        // A turma vem da matrícula (turma_alunos → turmas), não da coluna alunos.turma
+        // que não existe no schema.
+        const { data: matricula } = await supabase
+          .from('turma_alunos')
+          .select('turmas(nome, ano_lectivo)')
+          .eq('aluno_id', alunoId)
+          .limit(1)
+          .maybeSingle();
+        const turmaRow = (matricula as any)?.turmas;
+        setTurmaAluno(turmaRow?.nome ?? '');
+        setAnoLetivo(turmaRow?.ano_lectivo ?? '');
         const notas = (await buscarNotasAluno(alunoId)) as LinhaNota[] | null;
         if (notas && notas.length > 0) {
           const mapa: Record<string, DisciplinaAgrupada> = {};
@@ -124,7 +132,9 @@ export default function Boletim() {
           </View>
           <View style={s.alunoInfo}>
             <Text style={s.alunoNome}>{nomeAluno || 'Aluno'}</Text>
-            <Text style={s.alunoTurma}>{turmaAluno ? `${turmaAluno} · ` : ''}2025/2026</Text>
+            <Text style={s.alunoTurma}>
+              {[turmaAluno, anoLetivo || anoLectivoActual()].filter(Boolean).join(' · ')}
+            </Text>
             <Text style={s.alunoEscola}>Notas via Kulonga</Text>
           </View>
         </View>

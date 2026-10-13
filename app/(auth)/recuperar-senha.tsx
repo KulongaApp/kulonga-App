@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
   View,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
 import { useRouter } from 'expo-router';
 import { z } from 'zod';

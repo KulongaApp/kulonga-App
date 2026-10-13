@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { anoLectivoActual } from '../../constants/anoLectivo';
 import { obterEscolaDoUsuario, listarProfessores } from '../../services/professores';
 import { buscarEscola } from '../../services/escolas';
 import { listarAlunos } from '../../services/alunos';
@@ -100,7 +101,7 @@ export default function SecretariaPainel() {
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
             <Text style={styles.escolaNome}>🏫 {nomeEscola}</Text>
-            <Text style={styles.escolaSub}>Ano letivo 2025/2026</Text>
+            <Text style={styles.escolaSub}>Ano letivo {anoLectivoActual()}</Text>
           </View>
           <TouchableOpacity onPress={sair} accessibilityLabel="Sair da conta">
             <Ionicons name="log-out-outline" size={24} color="#fff" />
@@ -203,7 +204,7 @@ export default function SecretariaPainel() {
                       try {
                         const escolaId = await obterEscolaDoUsuario();
                         const { supabase } = await import('../../services/supabase');
-                        const { error } = await supabase.from('turmas').insert({ escola_id: escolaId, nome, ano_lectivo: '2025/2026', turno: 'Manhã' });
+                        const { error } = await supabase.from('turmas').insert({ escola_id: escolaId, nome, ano_lectivo: anoLectivoActual(), turno: 'Manhã' });
                         if (error) throw error;
                         Alert.alert('Criada', `Turma ${nome} criada!`); carregarTudo();
                       } catch (e: any) { Alert.alert('Erro', e.message); }

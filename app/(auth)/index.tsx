@@ -1,18 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Redirect } from 'expo-router';
 
-// Página temporária de autenticação
+// Entrada do grupo de autenticação → ecrã de escolha de perfil.
+// (Antes era um placeholder "Autenticação / Placeholder para telas de login".)
 export default function AuthIndex() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Autenticação</Text>
-      <Text style={styles.text}>Placeholder para telas de login e autenticação.</Text>
-    </View>
-  );
+  return <Redirect href="/(auth)/escolher-perfil" />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  text: { fontSize: 14, color: '#444' },
-});

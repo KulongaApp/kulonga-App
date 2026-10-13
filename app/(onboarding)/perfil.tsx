@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Button from '../../components/ui/Button';
+import { CORES } from '../../constants/marca';
 
 const PERFIS = [
   { chave: 'encarregado', icone: '👨‍👩‍👧', titulo: 'Encarregado de Educação', desc: 'Acompanha as notas e fala com os professores do teu filho', cor: '#C8511B' },
@@ -20,9 +23,6 @@ export default function Perfil() {
     await AsyncStorage.setItem('kulonga_perfil', selected);
     await AsyncStorage.setItem('kulonga_onboarding_feito', 'true');
 
-    // Debug: ver qual perfil foi seleccionado
-    console.log('Perfil seleccionado:', selected);
-
     router.replace('/(auth)/escolher-perfil' as any);
   };
 
@@ -38,7 +38,11 @@ export default function Perfil() {
         <Text style={styles.sub}>Isto só guarda a tua preferência — depois vais escolher Entrar ou Criar conta</Text>
       </View>
 
-      <View style={styles.list}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+      >
         {PERFIS.map((p) => {
           const ativo = selected === p.chave;
           return (
@@ -56,32 +60,44 @@ export default function Perfil() {
             </TouchableOpacity>
           );
         })}
-      </View>
+      </ScrollView>
 
       <View style={styles.foot}>
-        <TouchableOpacity accessibilityLabel={`Começar`} onPress={handleComecar} disabled={!selected} style={[styles.startButton, !selected ? { opacity: 0.6 } : undefined]}>
-          <Text style={styles.startText}>Começar</Text>
-        </TouchableOpacity>
+        <Button
+          titulo="Começar"
+          onPress={handleComecar}
+          variante="primario"
+          tamanho="grande"
+          desactivado={!selected}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, padding: 16, backgroundColor: CORES.branco },
   topo: { alignItems: 'center', marginBottom: 12 },
-  progress: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#E5E7EB', marginHorizontal: 6 },
-  dotActive: { backgroundColor: '#C8511B' },
-  titulo: { fontSize: 20, fontWeight: '800' },
-  sub: { color: '#6B7280' },
-  list: { marginTop: 12 },
-  card: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12 },
+  progress: { flexDirection: 'row', marginBottom: 12 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: CORES.borda, marginHorizontal: 6 },
+  dotActive: { backgroundColor: CORES.laranja },
+  titulo: { fontSize: 20, fontWeight: '800', color: CORES.texto },
+  sub: { color: CORES.textoSuave, textAlign: 'center' },
+  scroll: { flex: 1 },
+  list: { marginTop: 12, paddingBottom: 8 },
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: CORES.borda,
+    marginBottom: 12,
+    backgroundColor: CORES.branco,
+  },
   icone: { marginRight: 12 },
-  cardText: { marginLeft: 12, flex: 1 },
+  cardText: { flex: 1 },
   nome: { fontSize: 16, fontWeight: '800' },
-  desc: { color: '#6B7280' },
+  desc: { color: CORES.textoSuave },
   foot: { paddingVertical: 12 },
-  startButton: { backgroundColor: '#C8511B', paddingVertical: 12, borderRadius: 8, alignItems: 'center' },
-  startText: { color: '#fff', fontWeight: '800' },
 });

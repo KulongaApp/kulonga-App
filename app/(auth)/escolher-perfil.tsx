@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -52,7 +53,7 @@ export default function EscolherPerfil() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   scroll: { padding: 20, paddingBottom: 40, alignItems: 'center' },
-  logo: { color: '#1D5C8A', fontWeight: '800', fontSize: 18, letterSpacing: 2, marginTop: 8 },
+  logo: { color: '#C8511B', fontWeight: '800', fontSize: 22, letterSpacing: 2, marginTop: 8 },
   title: { fontSize: 28, fontWeight: '800', color: '#111827', marginTop: 22 },
   subtitle: { color: '#6B7280', fontSize: 13, marginTop: 4, marginBottom: 16, textAlign: 'center' },
   card: { width: '100%', minHeight: 78, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12, backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', shadowColor: '#0F172A', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 5, elevation: 1 },
