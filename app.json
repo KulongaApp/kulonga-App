@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "Kulonga",
+    "slug": "kulonga",
+    "version": "1.0.0",
+    "scheme": "kulonga",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      "expo-router"
+    ],
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "Kulonga",
+      "shortName": "Kulonga",
+      "lang": "pt-AO",
+      "themeColor": "#123C69",
+      "backgroundColor": "#F6EFE3",
+      "description": "A escola no teu bolso: notas, avisos e gestão escolar para alunos, encarregados, professores e secretaria."
+    },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#123C69"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#123C69"
+      },
+      "package": "ao.lukashi.kulonga"
+    },
+    "ios": {
+      "bundleIdentifier": "ao.lukashi.kulonga"
+    },
+    "extra": {
+      "supabaseUrl": "https://iszrvyjmiwshcybccuwz.supabase.co",
+      "supabaseAnonKey": "sb_publishable_QuDZ7Ve4z6oBEkz_V8aJcQ_i22HdqlW"
+    }
+  }
+}

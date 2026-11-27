@@ -1,0 +1,148 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "KULONGA"
+    },
+    {
+      "path": "/avisos",
+      "title": "Avisos"
+    },
+    {
+      "path": "/boletim",
+      "title": "Boletim"
+    },
+    {
+      "path": "/notificacoes",
+      "title": "Notificacoes"
+    },
+    {
+      "path": "/painel",
+      "title": "Painel"
+    },
+    {
+      "path": "/perfil",
+      "title": "Perfil"
+    },
+    {
+      "path": "/trabalhos",
+      "title": "Trabalhos"
+    },
+    {
+      "path": "/activar-convite-professor",
+      "title": "Activar Convite Professor"
+    },
+    {
+      "path": "/cadastro-aluno",
+      "title": "Cadastro Aluno"
+    },
+    {
+      "path": "/cadastro-escola",
+      "title": "Cadastro Escola"
+    },
+    {
+      "path": "/cadastro-token",
+      "title": "Cadastro Token"
+    },
+    {
+      "path": "/criar-conta",
+      "title": "Criar Conta"
+    },
+    {
+      "path": "/escolher-perfil",
+      "title": "Escolher Perfil"
+    },
+    {
+      "path": "/login-aluno",
+      "title": "Login Aluno"
+    },
+    {
+      "path": "/login-encarregado",
+      "title": "Login Encarregado"
+    },
+    {
+      "path": "/login-professor",
+      "title": "Login Professor"
+    },
+    {
+      "path": "/login-secretaria",
+      "title": "Login Secretaria"
+    },
+    {
+      "path": "/recuperar-senha",
+      "title": "Recuperar Senha"
+    },
+    {
+      "path": "/selector-perfil",
+      "title": "Selector Perfil"
+    },
+    {
+      "path": "/token-encarregado",
+      "title": "Token Encarregado"
+    },
+    {
+      "path": "/contactos",
+      "title": "Contactos"
+    },
+    {
+      "path": "/editar-perfil",
+      "title": "Editar Perfil"
+    },
+    {
+      "path": "/provincia",
+      "title": "Provincia"
+    },
+    {
+      "path": "/assiduidade",
+      "title": "Assiduidade"
+    },
+    {
+      "path": "/lancar-notas",
+      "title": "Lancar Notas"
+    },
+    {
+      "path": "/sync",
+      "title": "Sync"
+    },
+    {
+      "path": "/turmas",
+      "title": "Turmas"
+    },
+    {
+      "path": "/adicionar-professor",
+      "title": "Adicionar Professor"
+    },
+    {
+      "path": "/aluno-[id]",
+      "title": "Aluno [Id]"
+    },
+    {
+      "path": "/alunos",
+      "title": "Alunos"
+    },
+    {
+      "path": "/convites-professores",
+      "title": "Convites Professores"
+    },
+    {
+      "path": "/disciplinas",
+      "title": "Disciplinas"
+    },
+    {
+      "path": "/gerar-token",
+      "title": "Gerar Token"
+    },
+    {
+      "path": "/gestao-turmas",
+      "title": "Gestao Turmas"
+    },
+    {
+      "path": "/professores",
+      "title": "Professores"
+    },
+    {
+      "path": "/turma-[id]",
+      "title": "Turma [Id]"
+    }
+  ]
+}
